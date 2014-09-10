@@ -1,0 +1,11 @@
+{
+    "prepend"   : [
+        "/admin/bower_components/lodash/dist/lodash.js",
+        "/admin/bower_components/async/lib/async.js",
+        "/admin/bower_components/wires.js/build/wires.min.js"
+
+    ],
+    "append"	 	: ["app.js"],
+    "ignore"		: ["script-loader.js", "app.js"],
+    "priority" : [ "models/", "components/"]
+}

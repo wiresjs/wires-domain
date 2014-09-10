@@ -1,0 +1,44 @@
+<h2>Items</h2>
+<table width="100%">
+  <thead>
+    <tr>
+      <th width="20"></th>
+      <th width="20"></th>
+      <th width="20">id</th>
+      <th>Name</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr ws-repeat="$app in $items">
+      <td><i ws-click="this.app.remove()" class="fi-x small link"></i></td>
+      <td><i ws-click="act.toggle('showEditForm')" class="fi-pencil small link"></i></td>
+      
+      <td>$app.id</td>
+      <td>
+         <span ws-visible="!$showEditForm">
+             <a href="/test/#main/showEvents/$app.id">$app.name</a>
+         </span>
+         <span ws-visible="$showEditForm">
+             <form ws-submit="this.app.save(function(){ this.showEditForm = false }.bind(this));">
+                <input type="text" class="small" ws-value="$app.name">
+             </form>
+         </span> 
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+
+<form ws-submit="this.item.create()">
+  <fieldset>
+    <legend>New Application</legend>
+
+    <label>Input Label
+      <input type="text" ws-value="$item.name" placeholder="Inputs and other form elements go inside...">
+    </label>
+    <input type="submit" class="button tiny" value="Add">
+    <br>
+     <div ws-repeat="$error in $item._errors" class="label alert">$error.message</div>    
+  </fieldset>
+  
+</form>

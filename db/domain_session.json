@@ -1,0 +1,20 @@
+{
+  "sequence": 9,
+  "data": [
+    {
+      "session_id": "e10a1123a7d1d2b2f4d3cab9d4c81f96",
+      "user_id": 1,
+      "id": 1
+    },
+    {
+      "session_id": "3db29e09dffd1e5b22cb72744686327c",
+      "user_id": 1,
+      "id": 8
+    },
+    {
+      "session_id": "8410343772c10ce76da22d4468aecb62",
+      "user_id": 1,
+      "id": 9
+    }
+  ]
+}
