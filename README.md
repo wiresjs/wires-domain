@@ -1,4 +1,4 @@
-conmio-domain
+wires-domain
 ============
 
 Restful Model implementation
