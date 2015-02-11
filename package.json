@@ -1,7 +1,7 @@
 {
   "name": "wires-domain",
-  "version": "2.1.42",
-  "description": "Restfull service with automapping and multiple db support",
+  "version": "0.0.80",
+  "description": "Restfull service with auto-mapping and multiple db support",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
