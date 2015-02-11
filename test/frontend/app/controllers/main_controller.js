@@ -18,6 +18,10 @@ var app = app || {};
 		index : function(params, render) {
 			this.item = new app.ItemModel();
 			this.item.setCollection(this.items);
+
+
+			this.session = new app.Session();
+
 			render();
 		},
 		showEvents : function(params, render) {

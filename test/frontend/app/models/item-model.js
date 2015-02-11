@@ -18,4 +18,19 @@ var app = app || {};
         }
         
     });
+
+    app.Session = Wires.Model.extend({
+        _settings : {
+            resource : '/api/session',
+            schema : {
+                id: {},
+                name : {},
+                password : {}
+            },
+            hasMany : { events : function(){ return app.EventModel; } }
+        }
+    });
+
+
+
 })();

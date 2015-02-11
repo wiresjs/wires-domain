@@ -4,7 +4,7 @@ var DomainGroup = domain.models.BaseModel.extend({
 	schema : {
 		id : {},
 		name : {},
-		permissions : {}
+		permissions : { type : 'json' }
 	}
 });
 module.exports = DomainGroup;

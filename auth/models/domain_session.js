@@ -4,8 +4,8 @@ var DomainSession = domain.models.BaseModel.extend({
 	name : 'domain_session',
 	schema : {
 		id : {},
-		session_id : {},
-		user_id : {}
+		session_id : { type : 'varchar(50)'},
+		user_id : { type : 'int'}
 	},
 	setRandomSession : function()
 	{

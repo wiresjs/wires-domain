@@ -1,33 +1,38 @@
 {
   "name": "wires-domain",
-  "version": "0.0.1",
-  "description": "Domain models for express.js",
+  "version": "2.1.42",
+  "description": "Restfull service with automapping and multiple db support",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/wiresjs/wires-domain.git"
+    "test": "mocha"
   },
   "keywords": [
-    "rest",
+    "restful",
     "domain",
-    "mongodb"
+    "mongodb", "mysql"
   ],
   "author": "ivan.orlov",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/wiresjs/wires-domain/issues"
-  },
-  "homepage": "https://github.com/wiresjs/wires-domain",
   "dependencies": {
+    "MD5": "^1.2.1",
+    "app-root-path": "^1.0.0",
+    "async": "^0.9.0",
+    "body-parser": "^1.10.1",
+    "cookie-parser": "^1.3.3",
+    "express": "^4.11.0",
     "lodash": "^2.4.1",
+    "log4js": "^0.6.21",
+    "lorem-ipsum": "^1.0.1",
+    "lru-cache": "^2.5.0",
     "mkdirp": "^0.5.0",
-    "path-to-regexp": "^1.0.1",
+    "wires-config": "^0.0.2",
+    "path-to-regexp": "^1.0.0",
     "wires-class": "0.0.0"
   },
   "devDependencies": {
+    "body-parser": "^1.6.0",
+    "cookie-parser": "*",
+    "express": "^4.8.0",
     "should": "^4.0.4"
   }
 }

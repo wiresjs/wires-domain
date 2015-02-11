@@ -29,6 +29,23 @@
 </table>
 
 
+<form ws-submit="this.session.create()">
+  <fieldset>
+    <legend>Log int</legend>
+
+    <label>Login
+      <input type="text" ws-value="$session.name" >
+    </label>
+     <label>Password
+      <input type="text" ws-value="$session.password">
+    </label>
+    <input type="submit" class="button tiny" value="Add">
+    <br>
+    
+  </fieldset>
+  
+</form>
+
 <form ws-submit="this.item.create()">
   <fieldset>
     <legend>New Application</legend>

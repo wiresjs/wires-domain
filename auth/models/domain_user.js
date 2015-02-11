@@ -7,9 +7,11 @@ var DomainUser = domain.models.BaseModel.extend({
 		id : {},
 		name : {},
 		domain_group_id : {
-			required : true
+			required : true,
+			type : 'int'
 		},
 		password : {
+			hidden : true,
 			required : function(password) {
 				return crypto.createHash('md5').update(password).digest('hex');
 			}

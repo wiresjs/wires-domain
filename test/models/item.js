@@ -11,7 +11,6 @@ var Item = domain.models.BaseModel.extend({
 			}
 		},
 		password : {
-			type : 'string',
 			hidden : true
 		}
 	}

@@ -10,8 +10,20 @@ var SessionHandler = domain.resources.BaseResource.extend({
 	},
 	index : function(env) {
 		var res = env.res;
-		var session = new domain.auth.models.DomainSession();
-		res.send({});
+		if ( env.session ){
+			res.send({ session : env.session, user : env.session.user, group : env.session.group});
+		} else {
+			res.send({}, 401);
+		}
+	},
+	remove : function(env){
+		var res = env.res;
+		if ( env.session ){
+			env.session.remove();
+			res.send({ message : "Session removed"});
+		} else {
+			res.send({ message : "Session is not registered"});
+		}
 	},
 	// Login functionality
 	add : function(env) {
@@ -22,10 +34,12 @@ var SessionHandler = domain.resources.BaseResource.extend({
 		var password = req.body.password ? crypto.createHash('md5').update(req.body.password).digest('hex') : null;
 		if (!name || !password) {
 			env.res.status(400).send({
-				error : "Please, provide name and login!"
+				error : "Please, provide name and password!"
 			});
 			return;
 		}
+
+
 		var user = new domain.auth.models.DomainUser();
 		
 		// Checking user
@@ -34,6 +48,7 @@ var SessionHandler = domain.resources.BaseResource.extend({
 			password : password
 		}).first({
 			success : function(model) {
+				
 				if (model) {
 					var session = new domain.auth.models.DomainSession({
 						user_id : model.get("id")

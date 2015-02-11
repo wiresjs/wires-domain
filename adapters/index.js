@@ -1,10 +1,11 @@
 exports.Base = require('./base');
-exports.Memory = require('./memory');
-exports.File = require('./file-adapter');
-exports.Mysql = require('./mysql_adapter');
+exports.Tiny = require('./tiny-adapter')
+exports.Mongodb = require('./mongodb-adapter');
+exports.Mysql = require('./mysql-adapter');
 exports.current = null;
 exports.setAdapter = function(adapter)
 {
+	adapter.setAdapter();
 	this.current = adapter;
 }
 
