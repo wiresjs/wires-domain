@@ -151,7 +151,8 @@ var Service = function(req, res, next) {
         var abstractParameters = {
             criteria: mergedParams,
             order: {},
-            limit: 0
+            limit: 0,
+            prepare : _.isObject(handler) ? handler.prepare : null
         };
 
         // Setting the environment to be passed to a handler

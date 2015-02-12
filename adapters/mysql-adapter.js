@@ -17,6 +17,7 @@ var MysqlAdapter = adapters.Base.extend({
         try {
         Mosql = require('wires-mysql');
         } catch(e){
+            console.log(e);
             logger.fatal("wires-mysql is not installed!");
             logger.info("DO: npm install wires-mysql");
             
@@ -68,10 +69,13 @@ var MysqlAdapter = adapters.Base.extend({
         if (opts.offset && query.offset) {
             query = query.offset(opts.offset);
         }
-        if (opts.order && query.order) {
-            var order = {}
-            order[opts.order.key] = opts.direction
-            query.order(order)
+       
+        if (opts.orderBy && query.order) {
+            var o = {};
+            _.each(opts.orderBy, function(i){
+                o[i.key] = i.direction;
+            });
+            query.order(o);
         }
         return query;
     },

@@ -24,12 +24,16 @@ var ModelResource = BaseResource.extend({
         // Values could be passed from a filter, or (by default) can be taken from the query
         this.limit = (env.params.limit || this.query.limit ? this.query.limit * 1 : 0) || 0;
         this.offset = (env.params.offset || this.query.offset ? this.query.offset * 1 : 0) || 0;
+        this.prepareFunction = env.params.prepare;
         this.order = env.params.order;
     },
     // Makes request, based on defined conditions
     // First function to be called: _defineProperties
     _basicFind: function(env, success) {
         var self = this;
+        if ( this.prepareFunction ){
+            this.model = this.prepareFunction(env, this.model);
+        }
         this.model.find(this.criteria).order(this.order).limit(this.limit).offset(this.offset).all({
             success: success,
             error: function(e) {
