@@ -53,7 +53,8 @@ var BaseModel = Class.extend({
     },
     find: function(criteria) {
         if (criteria)
-            this.fetchOptions.criteria = criteria;
+            this.fetchOptions.criteria = _.merge(this.fetchOptions.criteria, criteria);
+
         return this;
     },
     // Limit
@@ -104,15 +105,15 @@ var BaseModel = Class.extend({
         return this;
     },
     _withCondition: function(models, condition, targetModel) {
-        var res =  _.mapValues(condition, function(value) {
-        	
+        var res = _.mapValues(condition, function(value) {
+
             if (value !== undefined && value[0] === "$") {
                 var key = value.substring(1, value.length);
                 var k = key.split('.');
                 var modelKey = k[0];
-                if ( k.length == 2){
-                	targetModel = k[0];
-                	modelKey = k[1];
+                if (k.length == 2) {
+                    targetModel = k[0];
+                    modelKey = k[1];
                 }
                 return models[targetModel].get(modelKey);
             }
@@ -120,6 +121,26 @@ var BaseModel = Class.extend({
         });
 
         return res;
+    },
+    _fetchCorrespondingRelations: function(current, error, success) {
+        var self = this;
+        async.eachSeries(self.joins, function(item, callback) {
+            // Create a condition
+            var condition = self._withCondition({}, item.condition, self.name)
+                // Request with model
+            new item.model().find(condition).first(function(wm) {
+                if (wm) {
+                    current.set(item.model.prototype.name, wm);
+                }
+                callback();
+            });
+        }, function(err) {
+            if (err) {
+                error(err);
+            } else {
+                success(current);
+            }
+        });
     },
     first: function() {
         var self = this;
@@ -135,29 +156,29 @@ var BaseModel = Class.extend({
                 var skipTheRest = false;
 
                 async.eachSeries(self.joins, function(item, callback) {
-                	var r = _.last(_.values(fres));
-                	if ( !r || skipTheRest){
-                		callback();
-                		skipTheRest = true;
-                		return;
-                	}
-                	// Create a condition
-                	var condition = self._withCondition(fres, item.condition, self.name)
-                	// Request with model
-                    new item.model().find(condition).first(function(wm){
-                    	if ( !wm){
-                    		skipTheRest = true;
-                    		callback();
-                    		return;	
-                    	}
-                    	fres[wm.name] = wm;
-                    	callback();
+                    var r = _.last(_.values(fres));
+                    if (!r || skipTheRest) {
+                        callback();
+                        skipTheRest = true;
+                        return;
+                    }
+                    // Create a condition
+                    var condition = self._withCondition(fres, item.condition, self.name)
+                        // Request with model
+                    new item.model().find(condition).first(function(wm) {
+                        if (!wm) {
+                            skipTheRest = true;
+                            callback();
+                            return;
+                        }
+                        fres[wm.name] = wm;
+                        callback();
                     });
                 }, function(err) {
                     if (err) {
                         callbacks.error(err);
                     } else {
-                        callbacks.success.apply(self,_.values(fres) );
+                        callbacks.success.apply(self, _.values(fres));
                     }
                 });
             },
@@ -166,12 +187,35 @@ var BaseModel = Class.extend({
             }
         });
     },
+    // Convinience method
+    asyncAll: function(callback, done) {
+        this.all(function(items) {
+            async.eachSeries(items, callback, done);
+        });
+    },
     all: function() {
         var self = this;
         var callbacks = this._getCallbacks.apply(this, arguments);
+
         this._fetch({
             success: function(results) {
-                callbacks.success(self._createInstance(results));
+
+                results = self._createInstance(results);
+                if (self.joins.length > 0) {
+
+                    async.eachSeries(results, function(item, callback) {
+                        self._fetchCorrespondingRelations(item, function(err) {
+                            callbacks.error(err);
+                        }, function() {
+                            callback();
+                        })
+                    }, function() {
+                        callbacks.success(results);
+                    });
+
+                } else {
+                    callbacks.success(results);
+                }
             },
             error: function(error) {
                 callbacks.error(error);
