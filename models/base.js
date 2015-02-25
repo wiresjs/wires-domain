@@ -16,6 +16,7 @@ var BaseModel = Class.extend({
             offset: 0,
         };
         this.joins = [];
+        this.attachments = [];
         this.adapter = adapters.getCurrent();
         this.attachValues(attrs);
     },
@@ -96,6 +97,17 @@ var BaseModel = Class.extend({
         });
         return this;
     },
+    // Attach models
+    // Works pretty much like join
+    // .attach("[key]", ModelObject)
+    // Searches on id field
+    attach: function(key, model) {
+        this.attachments.push({
+            key: key,
+            model: model
+        })
+        return this;
+    },
 
     with: function(model, condition) {
         this.joins.push({
@@ -105,6 +117,7 @@ var BaseModel = Class.extend({
         return this;
     },
     _withCondition: function(models, condition, targetModel) {
+
         var res = _.mapValues(condition, function(value) {
 
             if (value !== undefined && value[0] === "$") {
@@ -115,6 +128,7 @@ var BaseModel = Class.extend({
                     targetModel = k[0];
                     modelKey = k[1];
                 }
+              
                 return models[targetModel].get(modelKey);
             }
             return value;
@@ -124,16 +138,23 @@ var BaseModel = Class.extend({
     },
     _fetchCorrespondingRelations: function(current, error, success) {
         var self = this;
-        async.eachSeries(self.joins, function(item, callback) {
-            // Create a condition
-            var condition = self._withCondition({}, item.condition, self.name)
-                // Request with model
-            new item.model().find(condition).first(function(wm) {
-                if (wm) {
-                    current.set(item.model.prototype.name, wm);
-                }
-                callback();
-            });
+        async.eachSeries(self.attachments, function(item, callback) {
+            var target_id = current.get(item.key);
+            if (target_id) {
+                var criteria = {
+                    id : target_id
+                };
+                new item.model().find({
+                    id : target_id
+                }).first(function(wm) {
+                    if (wm) {
+                        current.set(item.model.prototype.name, wm);
+                    }
+                    callback();
+                });
+            } else {
+                 callback();
+            }
         }, function(err) {
             if (err) {
                 error(err);
@@ -201,7 +222,8 @@ var BaseModel = Class.extend({
             success: function(results) {
 
                 results = self._createInstance(results);
-                if (self.joins.length > 0) {
+
+                if (self.attachments.length > 0) {
 
                     async.eachSeries(results, function(item, callback) {
                         self._fetchCorrespondingRelations(item, function(err) {
