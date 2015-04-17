@@ -1,41 +1,56 @@
 var domain = require('./index');
 var express = require('express');
 var path = require('path')
-var Config = require('wires-config');
+var cookieParser = require('cookie-parser');
+var bodyParser = require('body-parser');
+var app = express();
+var Promise = require('promise');
+app.use(cookieParser('your secret here'));
 
 
-var cfg = new Config({domain : domain});
-cfg.load('app.conf')
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({
+	extended: true
+}));
 
 
-var app = domain.webApp();
-
-app.use('/test', express.static(path.join(__dirname, 'test/frontend')));
+app.use(domain.express())
 
 
-domain.add('/api/items/:id?', {
-    model: domain.test.models.Item
+
+domain.service.register("$b", function($req, $res) {
+	return new Promise(function(resolve, reject) {
+		setTimeout(function() {
+			resolve({
+				details: "This is async b"
+			})
+		}, 1)
+	})
+
+});
+
+domain.service.register("$a", function($b) {
+	return {
+		data: $b.details
+	}
 });
 
 
-domain.add('/api/items/:item_id/events/:id?', domain.test.models.Event);
-domain.add('/api/events/:id?', domain.test.models.Event);
 
-
-// user sessions
-domain.add('/api/session', {
-    handler: domain.auth.handlers.SessionHandler
+var rootResource = domain.resources.BaseResource.extend({
+	index: function($res, $a) {
+		$res.send("Hello world " + $a.data)
+	}
 });
+domain.add("/", rootResource);
 
-domain.add('/api/users', {
-    model: domain.auth.models.DomainUser,
-    permissions: {}
-});
 
-domain.add('/api/groups', domain.auth.models.DomainGroup);
 
-domain.connect(cfg, function() {
-    var port = cfg.get('app.port', 8888);
-    app.listen(port);
-    console.log('listening on port:' + port);
+var server = app.listen(3000, function() {
+
+	var host = server.address().address;
+	var port = server.address().port;
+
+	console.log('Example app listening at http://%s:%s', host, port);
+
 });
