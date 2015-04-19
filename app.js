@@ -1,10 +1,10 @@
 var domain = require('./index');
 var express = require('express');
-var path = require('path')
+var path = require('path');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var app = express();
-var Promise = require('promise');
+
 app.use(cookieParser('your secret here'));
 
 
@@ -13,37 +13,9 @@ app.use(bodyParser.urlencoded({
 	extended: true
 }));
 
-
-app.use(domain.express())
-
-
-
-domain.service.register("$b", function($req, $res) {
-	return new Promise(function(resolve, reject) {
-		setTimeout(function() {
-			resolve({
-				details: "This is async b"
-			})
-		}, 1)
-	})
-
-});
-
-domain.service.register("$a", function($b) {
-	return {
-		data: $b.details
-	}
-});
-
-
-
-var rootResource = domain.resources.BaseResource.extend({
-	index: function($res, $a) {
-		$res.send("Hello world " + $a.data)
-	}
-});
-domain.add("/", rootResource);
-
+require('require-all')(__dirname + '/testservices');
+require('require-all')(__dirname + '/testrest');
+app.use(domain.express());
 
 
 var server = app.listen(3000, function() {

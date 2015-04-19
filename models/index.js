@@ -1,1 +1,0 @@
-exports.BaseModel = require('./base')
