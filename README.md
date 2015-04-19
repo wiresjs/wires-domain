@@ -1,6 +1,11 @@
 wires-domain
 ============
 
-Restful Model implementation
+Restful Service for express.js with dependency injection.
 
+## Installation
+
+	npm install wires-domain --save
+
+  
 

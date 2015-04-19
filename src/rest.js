@@ -1,4 +1,4 @@
-var domain = require('./index.js');
+var domain = require('../index.js');
 var pathToRegexp = require('path-to-regexp');
 var _ = require('lodash');
 var invoker = require('./invoker');
@@ -40,7 +40,7 @@ module.exports = function(req, res, next) {
 
 	// Extract params 
 	var mergedParams = {};
-	console.log(keys, params);
+
 	_.each(keys, function(data, index) {
 		var i = index + 1;
 		if (params[i] !== null && params[i] !== undefined) {

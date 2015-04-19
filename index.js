@@ -1,16 +1,11 @@
 var log4js = require('log4js');
 var _ = require("lodash");
 var express = require('express');
-var scope = require('./src/scope');
+var Promise = require('promise');
 var Class = require('wires-class');
+var rest = require('./src/rest');
+var scope = require('./src/scope');
 
-
-exports.logger = log4js.getLogger("domain");
-exports.errors = require('./errors');
-
-
-
-var restResources = {};
 
 
 exports.path = function(path, handler) {
@@ -51,7 +46,14 @@ exports.BaseResource = Class.extend({
 });
 
 
+exports.promise = function(cb) {
+	return new Promise(cb)
+}
 
 exports.express = function() {
 	return rest;
 };
+
+exports.Exception = require('./src/exception');
+
+exports.logger = log4js.getLogger("domain");

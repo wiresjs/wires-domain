@@ -1,6 +1,6 @@
 var _ = require('lodash');
 var async = require('async');
-var domain = require('./index');
+var domain = require('../index');
 var scope = require('./scope');
 var logger = require('log4js').getLogger("domain");
 
@@ -11,7 +11,6 @@ var ARGUMENT_NAMES = /([^\s,]+)/g;
 var services = {};
 
 function getParamNames(func) {
-	console.log(func.toString());
 	var fnStr = func.toString().replace(STRIP_COMMENTS, '');
 	var result = fnStr.slice(fnStr.indexOf('(') + 1, fnStr.indexOf(')')).match(ARGUMENT_NAMES);
 	if (result === null)
@@ -65,7 +64,7 @@ module.exports = {
 		for (var i in variables) {
 			var variableName = variables[i];
 			if (!avialableServices[variableName]) {
-				return callReady(new domain.errors.Exception("Service with name '" + variableName + "'' was not found", 400), null);
+				return callReady(new domain.Exception("Service with name '" + variableName + "'' was not found", 400), null);
 			}
 			args.push(avialableServices[variableName]);
 		}
@@ -115,7 +114,7 @@ module.exports = {
 				}
 			} else {
 				callReady(null, functionResult)
-			}
+			};
 
 
 		});
