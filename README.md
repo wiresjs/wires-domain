@@ -84,6 +84,9 @@ Accesing this service with constuct the model, call init, resolving all dependen
 		$res.send(item.testMe())
 	}
 
+You can create an abstraction layer on top on domain.Model
+Extend as much as you like, building your own solutions!
+
 ## Exceptions
 
 Any exception can be thrown. If an object is a dictionary and it containes "status" key, that will be taken as a http code response. You can combine it with "message"
