@@ -59,4 +59,15 @@ or you can use
        
 It is equal
 
+### Exception
+
+Any exception can be thrown. If an object is a dictionary and it containes "status" key, that will be taken as a http code response. You can combine it with "message"
+
+     domain.service("$a", function($params.id) {
+	if ( $params.id === 5 ){
+	  throw {status : 400, message "You can't access this item"}
+	}
+     });
+
+
 
