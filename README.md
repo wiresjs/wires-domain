@@ -15,24 +15,48 @@ Resembles angular.js style.
 
 Require all at once:
 
-		require('require-all')('/services');
-		require('require-all')('/rest');
+	require('require-all')('/services');
+	require('require-all')('/rest');
 
 Connect with express.js
 
-		app.use(domain.express());
+	app.use(domain.express());
 
 
 ## Restfull example
 
-		var domain = require('../index');
-		domain.path("/:id?", domain.BaseResource.extend({
-			index: function($res, $params) {
+	var domain = require('../index');
+	domain.path("/:id?", domain.BaseResource.extend({
+		index: function($res, $params) {
 				$res.send({ id : $params.id } )
-			}
-		}));
+		}
+	}));
 
 All matched paramaters are combined into "$params" injection
 
+## Services
+
+### Synchronous
+
+	domain.service("$a", function($b) {
+	     return "a"
+	});
+
+### Asynchronous
+        domain.service("$wait", function() {
+		return domain.promise(function(resolve, reject) {
+			setTimeout(function() {
+				resolve({
+				status: "Waiting is done"
+				})
+			}, 1000);
+		})
+	});
+
+or you can use 
+
+       new Promise(function(resolve, reject){})
+       
+It is equal
 
 
