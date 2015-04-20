@@ -80,8 +80,8 @@ Simply do that:
 
 Accesing this service with constuct the model, call init, resolving all dependencies, (except for promise)
 
-      	index: function($res, item) {
-	  	$res.send(item.testMe())
+	index: function($res, item) {
+		$res.send(item.testMe())
 	}
 
 ### Exceptions
