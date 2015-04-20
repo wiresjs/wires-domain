@@ -60,7 +60,7 @@ or you can use
 It is equal
 
 
-### Models
+## Models
 
 Wires supports automatic model creation.
 Simply do that:
@@ -84,7 +84,7 @@ Accesing this service with constuct the model, call init, resolving all dependen
 		$res.send(item.testMe())
 	}
 
-### Exceptions
+## Exceptions
 
 Any exception can be thrown. If an object is a dictionary and it containes "status" key, that will be taken as a http code response. You can combine it with "message"
 
