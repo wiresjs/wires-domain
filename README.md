@@ -25,7 +25,7 @@ Connect with express.js
 
 ## Restfull example
 
-	var domain = require('../index');
+	var domain = require('wires-domain');
 	domain.path("/:id?", domain.BaseResource.extend({
 		index: function($res, $params) {
 				$res.send({ id : $params.id } )
