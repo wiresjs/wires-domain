@@ -59,7 +59,32 @@ or you can use
        
 It is equal
 
-### Exception
+
+### Models
+
+Wires supports automatic model creation.
+Simply do that:
+
+    domain.service("item", function() {
+		return domain.Model.extend({
+		    init : function($a)
+		    {
+		    	this.localVariable = $a;
+		    },
+		    testMe : function()
+		    {
+		    	return this.localVariable;
+		    }
+		});
+	});
+
+Accesing this service with constuct the model, call init, resolving all dependencies, (except for promise)
+
+      index: function($res, item) {
+	  $res.send(item.testMe())
+      }
+
+### Exceptions
 
 Any exception can be thrown. If an object is a dictionary and it containes "status" key, that will be taken as a http code response. You can combine it with "message"
 
@@ -68,6 +93,5 @@ Any exception can be thrown. If an object is a dictionary and it containes "stat
 		throw {status : 400, message "You can't access this item"}
 	}
      });
-
 
 
