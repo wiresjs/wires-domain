@@ -10,11 +10,9 @@ var domain = require('../index');
 domain.path("/", domain.BaseResource.extend({
 
 
-	index: function($res, $date, $auth) {
-		$auth.validate();
+	index: function($res, item) {
+		//var item = new Item();
 
-		$res.send({
-			data: $date
-		})
+		$res.send(item.pukka())
 	}
 }));

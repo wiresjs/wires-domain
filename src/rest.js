@@ -64,6 +64,7 @@ module.exports = function(req, res, next) {
 	if (isValidResource) {
 		parseOptions.source = handler.prototype[method];
 		parseOptions.f = resourceInstance[method];
+		parseOptions.instance = resourceInstance
 	}
 	// in case if it's just a function
 	else {

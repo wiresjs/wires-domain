@@ -6,7 +6,9 @@ var Class = require('wires-class');
 var rest = require('./src/rest');
 var scope = require('./src/scope');
 
-
+exports.Exception = require('./src/exception');
+exports.Model = require('./src/model');
+exports.logger = log4js.getLogger("domain");
 
 exports.path = function(path, handler) {
 	scope.addRestResource(path, handler);
@@ -15,6 +17,13 @@ exports.path = function(path, handler) {
 exports.service = function(name, handler) {
 	scope.addService(name, handler);
 };
+
+
+
+exports.callService = function(serviceName) {
+
+}
+
 
 exports.BaseResource = Class.extend({
 	initialize: function() {
@@ -53,7 +62,3 @@ exports.promise = function(cb) {
 exports.express = function() {
 	return rest;
 };
-
-exports.Exception = require('./src/exception');
-
-exports.logger = log4js.getLogger("domain");
