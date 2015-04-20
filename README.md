@@ -65,7 +65,7 @@ Any exception can be thrown. If an object is a dictionary and it containes "stat
 
      domain.service("$a", function($params.id) {
 	if ( $params.id === 5 ){
-	  throw {status : 400, message "You can't access this item"}
+		throw {status : 400, message "You can't access this item"}
 	}
      });
 
