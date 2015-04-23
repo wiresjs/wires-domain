@@ -30,10 +30,10 @@ For more example see test/flow.js
 
 ### Asynchronous
 
-        domain.service("$wait", function() {
-	   return domain.promise(function(resolve, reject) {
-		resolve("Some async result")	
-	   })
+	domain.service("$wait", function() {
+		return domain.promise(function(resolve, reject) {
+			resolve("Some async result")	
+		})
 	});
 
 you can also use promise directly
