@@ -6,8 +6,79 @@ Restful Service for express.js with dependency injection.
 ## Installation
 
 	npm install wires-domain --save
+	
+## Services
 
-## Architecture
+Define few services
+
+	domain.service("$a", function() {
+		return "Response from $a"
+	});
+	domain.service("$b", function($a) {
+		return $a
+	});
+	
+Now we can call service "$b", that returns results from service "$a"
+
+	domain.require(function($b) {
+	   $b.should.be.equal("Response from $a")
+	   return "hello"
+	}).catch(function(error) {
+		console.log(error);
+	}).then(function(result) {
+	    result.should.be.equal("hello")
+	})
+
+domain.require always returns a promise.
+
+For more example see test/flow.js
+
+### Asynchronous
+        domain.service("$wait", function() {
+		return domain.promise(function(resolve, reject) {
+			setTimeout(function() {
+				resolve({
+				status: "Waiting is done"
+				})
+			}, 1000);
+		})
+	});
+
+you can also use promise directly
+
+       new Promise(function(resolve, reject){})
+       
+
+
+## Factories
+
+Wires supports automatic factory creation.
+Simply do that:
+
+    domain.service("item", function() {
+		return domain.Factory.extend({
+		    init : function($a)
+		    {
+		    	this.localVariable = $a;
+		    },
+		    testMe : function()
+		    {
+		    	return this.localVariable;
+		    }
+		});
+	});
+
+Accesing this service with constuct the model call init and resolving all dependencies
+
+	index: function($res, item) {
+		$res.send(item.testMe())
+	}
+
+You can create an abstraction layer on top on domain.Factory
+Extend as much as you like, building your own solutions!
+
+
+## Restful Architecture
 
 2 folders to be created. Services and RestApi. Put all your dependencies into "services" folder.
 Resembles angular.js style.
@@ -33,58 +104,35 @@ Connect with express.js
 
 All matched paramaters are combined into "$params" injection
 
-## Services
 
-### Synchronous
+## Restful local injections
 
-	domain.service("$a", function($b) {
-	     return "a"
-	});
+### $res
+Express res
 
-### Asynchronous
-        domain.service("$wait", function() {
-		return domain.promise(function(resolve, reject) {
-			setTimeout(function() {
-				resolve({
-				status: "Waiting is done"
-				})
-			}, 1000);
-		})
-	});
+### $req
+Express req
 
-or you can use 
+### $params
+matched parameters from the url
 
-       new Promise(function(resolve, reject){})
-       
-It is equal
+### $next
+It is possible to try next candidate. Note, that this is not express "next" function.
+Let's check an example:
 
+	domain.path("/", domain.BaseResource.extend({
+		index: function($res, $nice, $next) {
+			$next();
+			//$res.send("First")
+		}
+	}));
+	
+	domain.path("/", domain.BaseResource.extend({
+		index: function($res) {
+			$res.send("Second")
+		}
+	}));
 
-## Models
-
-Wires supports automatic model creation.
-Simply do that:
-
-    domain.service("item", function() {
-		return domain.Model.extend({
-		    init : function($a)
-		    {
-		    	this.localVariable = $a;
-		    },
-		    testMe : function()
-		    {
-		    	return this.localVariable;
-		    }
-		});
-	});
-
-Accesing this service with constuct the model, call init, resolving all dependencies, (except for promise)
-
-	index: function($res, item) {
-		$res.send(item.testMe())
-	}
-
-You can create an abstraction layer on top on domain.Model
-Extend as much as you like, building your own solutions!
 
 ## Exceptions
 
