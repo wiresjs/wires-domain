@@ -58,7 +58,7 @@ Simply do that:
 		});
 	});
 
-Accesing this service will constuct the model call init and resolving all dependencies
+Accesing this service will constuct the model call init and resolve all injected dependencies
 
 	index: function($res, item) {
 		$res.send(item.testMe())
