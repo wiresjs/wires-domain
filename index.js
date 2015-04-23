@@ -26,7 +26,7 @@ exports.getService = function(serviceName, callback) {
 }
 
 exports.require = function(cb) {
-	Invoke.invoke.apply(Invoke, arguments);
+	return Invoke.invoke.apply(Invoke, arguments);
 }
 
 exports.BaseResource = Class.extend({

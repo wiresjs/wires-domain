@@ -1,6 +1,7 @@
 var domain = require("./index.js");
 require('require-all')(__dirname + '/testservices');
 require('require-all')(__dirname + '/testrest');
+var Promise = require("promise");
 
 
 domain.service("$nice", function() {

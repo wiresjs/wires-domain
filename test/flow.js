@@ -72,13 +72,12 @@ var CustomClass = Class.extend({
 describe('Work flow', function() {
 
 	it('Should simple call the service without dependencies', function(done) {
-		domain.require(function($pukka) {
+		domain.require(function($a) {
 			$a.should.be.equal("Response from $a")
+		}).catch(function(error) {
+			console.log(error);
+		}).then(function() {
 			done();
-		}).then(function(res) {
-			console.log("GOT SHIT")
-		}).catch(function(e) {
-			console.log("ErRORRS", e);
 		})
 	});
 
@@ -113,11 +112,13 @@ describe('Work flow', function() {
 		});
 	});
 
-	it('Should Pass fail without local argument and completion handler only', function(done) {
+	it('Should fail without local argument', function(done) {
 		domain.require(function($e) {
 			$e.should.be.equal("hello")
 
-		}, function(err, results) {
+		}).then(function() {
+
+		}).catch(function(err) {
 			err.code.should.be.equal(400)
 			done();
 		});
@@ -129,7 +130,7 @@ describe('Work flow', function() {
 			return "some"
 		}, {
 			$local: "hello"
-		}, function(err, res) {
+		}).then(function(res) {
 			res.should.be.equal("some");
 			done();
 		});
@@ -145,31 +146,28 @@ describe('Work flow', function() {
 			})
 		}, {
 			$local: "hello"
-		}, function(err, res) {
+		}).then(function(res) {
 			res.should.be.equal("some");
 			done();
-		});
+		})
 	});
 
 	it('Should Call and Create Sync factory', function(done) {
 		domain.require(function($someFactory) {
 			$someFactory.someMethod().should.be.equal("test")
-		}, function(err, results) {
-			if (!err) {
-				done();
-			}
+		}).then(function() {
+			done();
 		});
 	});
 
 	it('Should Call and Create Async factory', function(done) {
 		domain.require(function($asyncFactory) {
 			$asyncFactory.myVar.should.be.equal(1)
-		}, function(err, results) {
-			if (!err) {
-				done();
-			}
+		}).then(function() {
+			done();
 		});
 	});
+
 
 	it('Should Call custom service method with injected dependencies ', function(done) {
 		var my = new CustomClass();
@@ -180,11 +178,9 @@ describe('Work flow', function() {
 			target: my[methodName],
 			instance: my
 		}
-		domain.require(opts, function(err, results) {
+		domain.require(opts).then(function(results) {
 			results.should.be.equal("Response from $a")
-			if (!err) {
-				done();
-			}
+			done();
 		});
 	});
 });

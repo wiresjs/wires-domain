@@ -100,32 +100,22 @@ module.exports = {
 	invoke: function() {
 
 
-		var args = this.getInputArguments(arguments);
-		var localServices = args.localServices;
-		var variables = getParamNames(args.source);
-		var target = args.target;
-		var callReady = args.callReady;
-		var instance = args.instance;
+		var data = this.getInputArguments(arguments);
+		var localServices = data.localServices;
+		var variables = getParamNames(data.source);
+		var target = data.target;
+		var callReady = data.callReady;
+		var instance = data.instance;
 		var globalServices = scope.getServices();
-
+		var self = this;
 		var resultPromise = new Promise(function(resolve, reject) {
 
 			var args = [];
-			var self = this;
-
 			var avialableServices = _.merge(localServices, globalServices);
-
-
 			for (var i in variables) {
 				var variableName = variables[i];
 				if (!avialableServices[variableName]) {
-					console.log("SHOULD REJECT");
-					//reject(new domain.Exception("Service with name '" + variableName + "'' was not found", 400));
-					//rej
-					reject({
-						aa: "FUCKER"
-					})
-					return;
+					return reject(new domain.Exception("Service with name '" + variableName + "'' was not found", 400));
 				}
 				args.push(avialableServices[variableName]);
 			}
@@ -138,10 +128,8 @@ module.exports = {
 
 					self.invoke(argService, localServices).then(function(r) {
 						results.push(r)
-						console.log("THEN ");
 						next(null);
 					}).catch(function(e) {
-						console.log("REJECTED");
 						next(e);
 					});
 				} else {

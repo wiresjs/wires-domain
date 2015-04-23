@@ -7,7 +7,6 @@ Restful Service for express.js with dependency injection.
 
 	npm install wires-domain --save
 
-
 ## Architecture
 
 2 folders to be created. Services and RestApi. Put all your dependencies into "services" folder.

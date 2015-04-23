@@ -18,30 +18,33 @@ var defineMethod = function(req) {
 	}
 };
 
-module.exports = function(req, res, next) {
-	var params, keys, handler;
-	var url = req.path;
-	var resources = scope.getRestResources();
-	_.each(resources, function(resourceHandler, path) {
-		keys = [];
-		handler = resourceHandler;
-		var re = pathToRegexp(path, keys);
+
+var getResourceCandidate = function(resources, index, url) {
+	for (var i = index; i < resources.length; i++) {
+		var item = resources[i];
+		var keys = [];
+		var re = pathToRegexp(item.path, keys);
 		params = re.exec(url);
-		if (params)
-			return false;
-	});
+		if (params) {
+			return {
+				params: params,
+				keys: keys,
+				handler: item.handler,
+				nextIndex: index + 1
+			}
+		}
+	}
+}
 
 
-	// No resource handler - skip
-	if (!params) {
-		next();
-		return;
-	};
 
+var callCurrentResource = function(info, req, res) {
 	// Extract params 
 	var mergedParams = {};
+	var params = info.params;
+	var handler = info.handler;
 
-	_.each(keys, function(data, index) {
+	_.each(info.keys, function(data, index) {
 		var i = index + 1;
 		if (params[i] !== null && params[i] !== undefined) {
 			var parameterValue = params[i];
@@ -75,23 +78,40 @@ module.exports = function(req, res, next) {
 	invoker.invoke(parseOptions, {
 		$req: req,
 		$res: res,
-		$params: mergedParams
-	}, function(err, result) {
-
-		if (err) {
-			var errResponse = {
-				status: 500,
-				message: "Error"
-			};
-			if (_.isObject(err)) {
-				errResponse.status = err.status || 500;
-				errResponse.message = err.message || "Error";
-				if (err.details) {
-					errResponse.details = err.details;
+		$params: mergedParams,
+		// Next function tries to get next
+		$next: function() {
+			return function() {
+				var resources = scope.getRestResources();
+				var data = getResourceCandidate(resources, info.nextIndex, req.path);
+				if (data) {
+					return callCurrentResource(data, req, res)
 				}
 			}
-			res.status(errResponse.status).send(errResponse);
 		}
-	});
+	}).then(function(result) {
 
+	}).catch(function(err) {
+		var errResponse = {
+			status: 500,
+			message: "Error"
+		};
+		if (_.isObject(err)) {
+			errResponse.status = err.status || 500;
+			errResponse.message = err.message || "Error";
+			if (err.details) {
+				errResponse.details = err.details;
+			}
+		}
+		res.status(errResponse.status).send(errResponse);
+	});
+}
+
+module.exports = function(req, res, next) {
+	var resources = scope.getRestResources();
+	var data = getResourceCandidate(resources, 0, req.path);
+	if (!data) {
+		return next();
+	}
+	return callCurrentResource(data, req, res)
 };
