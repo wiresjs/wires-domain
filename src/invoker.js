@@ -115,7 +115,8 @@ module.exports = {
 			for (var i in variables) {
 				var variableName = variables[i];
 				if (!avialableServices[variableName]) {
-					return reject(new domain.Exception("Service with name '" + variableName + "'' was not found", 400));
+					logger.fatal("Error while injecting variable '" + variableName + "' into function \n" + data.source.toString());
+					return reject(new domain.Exception("Service with name '" + variableName + "'' was not found ", 400));
 				}
 				args.push(avialableServices[variableName]);
 			}
