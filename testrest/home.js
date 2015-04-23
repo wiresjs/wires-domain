@@ -10,9 +10,11 @@ var domain = require('../index');
 domain.path("/", domain.BaseResource.extend({
 
 
-	index: function($res, item) {
-		//var item = new Item();
+	index: function($res, $nice) {
 
-		$res.send(item.pukka())
+		//var item = new Item();
+		console.log("FINALLY EXEC>>>>>>>>>>>>>>>>>>>>>", $nice);
+
+		$res.send($nice)
 	}
 }));

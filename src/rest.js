@@ -63,19 +63,20 @@ module.exports = function(req, res, next) {
 	var parseOptions = {};
 	if (isValidResource) {
 		parseOptions.source = handler.prototype[method];
-		parseOptions.f = resourceInstance[method];
-		parseOptions.instance = resourceInstance
+		parseOptions.target = resourceInstance[method];
+		parseOptions.instance = resourceInstance;
+
 	}
 	// in case if it's just a function
 	else {
 		parseOptions = handler;
 	}
 
-	invoker.invoke({
+	invoker.invoke(parseOptions, {
 		$req: req,
 		$res: res,
 		$params: mergedParams
-	}, parseOptions, function(err, result) {
+	}, function(err, result) {
 
 		if (err) {
 			var errResponse = {

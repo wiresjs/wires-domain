@@ -2,7 +2,7 @@ var domain = require('../index');
 var Class = require('wires-class');
 
 module.exports = Class.extend({
-	init: function($a) {},
+	init: function() {},
 }, {
-	__domain_model__: true
+	__domain_factory__: true
 });

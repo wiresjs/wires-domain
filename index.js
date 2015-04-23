@@ -4,10 +4,12 @@ var express = require('express');
 var Promise = require('promise');
 var Class = require('wires-class');
 var rest = require('./src/rest');
+var Invoke = require('./src/invoker');
 var scope = require('./src/scope');
 
+
 exports.Exception = require('./src/exception');
-exports.Model = require('./src/model');
+exports.Factory = require('./src/factory');
 exports.logger = log4js.getLogger("domain");
 
 exports.path = function(path, handler) {
@@ -19,11 +21,13 @@ exports.service = function(name, handler) {
 };
 
 
-
-exports.callService = function(serviceName) {
+exports.getService = function(serviceName, callback) {
 
 }
 
+exports.require = function(cb) {
+	Invoke.invoke.apply(Invoke, arguments);
+}
 
 exports.BaseResource = Class.extend({
 	initialize: function() {
