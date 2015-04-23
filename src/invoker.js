@@ -3,7 +3,7 @@ var async = require('async');
 var domain = require('../index');
 var scope = require('./scope');
 var logger = require('log4js').getLogger("domain");
-
+var Promise = require("promise");
 var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
 var ARGUMENT_NAMES = /([^\s,]+)/g;
 

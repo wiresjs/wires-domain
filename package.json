@@ -1,6 +1,6 @@
 {
 	"name": "wires-domain",
-	"version": "1.1.2",
+	"version": "1.1.3",
 	"description": "Restfull service with dependency injection",
 	"main": "index.js",
 	"scripts": {
