@@ -21,12 +21,7 @@ Define few services
 Now we can call service "$b", that returns results from service "$a"
 
 	domain.require(function($b) {
-	   $b.should.be.equal("Response from $a")
-	   return "hello"
-	}).catch(function(error) {
-		console.log(error);
-	}).then(function(result) {
-	    result.should.be.equal("hello")
+		//$b is resolved and ready to be used!
 	})
 
 domain.require always returns a promise.
@@ -34,21 +29,16 @@ domain.require always returns a promise.
 For more example see test/flow.js
 
 ### Asynchronous
+
         domain.service("$wait", function() {
-		return domain.promise(function(resolve, reject) {
-			setTimeout(function() {
-				resolve({
-				status: "Waiting is done"
-				})
-			}, 1000);
-		})
+	   return domain.promise(function(resolve, reject) {
+		resolve("Some async result")	
+	   })
 	});
 
 you can also use promise directly
 
        new Promise(function(resolve, reject){})
-       
-
 
 ## Factories
 
@@ -68,7 +58,7 @@ Simply do that:
 		});
 	});
 
-Accesing this service with constuct the model call init and resolving all dependencies
+Accesing this service will constuct the model call init and resolving all dependencies
 
 	index: function($res, item) {
 		$res.send(item.testMe())
@@ -98,7 +88,7 @@ Connect with express.js
 	var domain = require('wires-domain');
 	domain.path("/:id?", domain.BaseResource.extend({
 		index: function($res, $params) {
-				$res.send({ id : $params.id } )
+			$res.send({ id : $params.id } )
 		}
 	}));
 
@@ -142,6 +132,6 @@ Any exception can be thrown. If an object is a dictionary and it containes "stat
 		if ( $params.id === 5 ){
 			throw {status : 400, message "You can't access this item"}
 		}
-	});
+     });
 
 
