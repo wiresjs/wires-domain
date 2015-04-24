@@ -33,28 +33,32 @@ exports.BaseResource = Class.extend({
 	initialize: function() {
 		_.bindAll(this);
 	},
-	index: function(env) {
-		env.res.send({
-			error: 'Not implemented'
-		}, 501);
+	index: function($res) {
+		throw {
+			status: 505,
+			message: 'Not implemented'
+		};
 	},
 	// new record
-	add: function(env) {
-		env.res.send({
-			error: 'Not implemented'
-		}, 501);
+	add: function($res) {
+		throw {
+			status: 505,
+			message: 'Not implemented'
+		}
 	},
 	// update
-	update: function(env) {
-		env.res.send({
-			error: 'Not implemented'
-		}, 501);
+	update: function($res) {
+		throw {
+			status: 505,
+			message: 'Not implemented'
+		}
 	},
 	// remove
-	remove: function(env) {
-		env.res.send({
-			error: 'Not implemented'
-		}, 501);
+	remove: function() {
+		throw {
+			status: 505,
+			message: 'Not implemented'
+		}
 	}
 });
 

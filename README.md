@@ -94,6 +94,37 @@ Connect with express.js
 
 All matched paramaters are combined into "$params" injection
 
+### Restful method
+
+	// GET
+    index: function($res) {
+		throw {
+			status: 505,
+			message: 'Not implemented'
+		};
+	},
+	// POST
+	add: function($res) {
+		throw {
+			status: 505,
+			message: 'Not implemented'
+		}
+	},
+	// PUT
+	update: function($res) {
+		throw {
+			status: 505,
+			message: 'Not implemented'
+		}
+	},
+	// DELETE
+	remove: function() {
+		throw {
+			status: 505,
+			message: 'Not implemented'
+		}
+	}
+
 
 ## Restful local injections
 
