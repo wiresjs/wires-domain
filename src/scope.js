@@ -1,20 +1,20 @@
-var restResources = [];
-var services = {}
-
 module.exports = {
 	addRestResource: function(path, handler) {
-		restResources.push({
+		global.__wires_resources__ = global.__wires_resources__ || [];
+
+		global.__wires_resources__.push({
 			path: path,
 			handler: handler
 		});
 	},
 	addService: function(name, f) {
-		services[name] = f;
+		global.__wires_services__ = global.__wires_services__ || {};
+		global.__wires_services__[name] = f;
 	},
 	getServices: function() {
-		return services;
+		return global.__wires_services__ || {};
 	},
 	getRestResources: function() {
-		return restResources;
+		return global.__wires_resources__ || [];
 	}
 }
