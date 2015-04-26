@@ -1,6 +1,5 @@
 var log4js = require('log4js');
 var _ = require("lodash");
-var express = require('express');
 var Promise = require('promise');
 var Class = require('wires-class');
 var rest = require('./src/rest');
