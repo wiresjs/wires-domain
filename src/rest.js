@@ -66,6 +66,9 @@ var callCurrentResource = function(info, req, res) {
 	// Define parse options
 	var parseOptions = {};
 	if (isValidResource) {
+		if (handler.prototype["all"]) {
+			method = "all";
+		}
 		parseOptions.source = handler.prototype[method];
 		parseOptions.target = resourceInstance[method];
 		parseOptions.instance = resourceInstance;
