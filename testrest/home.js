@@ -3,14 +3,14 @@ var domain = require('../index');
 
 domain.path("/:action?", {
 	get : function($res, $query, $assert){
-
+		
 		$query.require('id', 'name')
 
 		
 		//$assert.notfound('THis bloody shit was not found')
 		return domain.promise(function(resolve){
 
-			resolve($query.items)
+			resolve($query.attrs)
 		});
 	},
 	pukka : function($res, $next){

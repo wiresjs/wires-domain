@@ -69,17 +69,26 @@ var restLocalServices = function(info, params, req, res){
 	// Body
 	services.$body = {
 		require : required.bind(req.body),
-		items : req.body
+		attrs : req.body,
+		getAttributes : function(){
+			return req.body;
+		}
 	}
 	// Query
 	services.$query = {
 		require : required.bind(req.query),
-		items : req.query
+		attrs : req.query,
+		getAttributes : function(){
+			return req.query;
+		}
 	}
 	// Assertion codes
 	services.$assert = {
-		notfound : function(message){
-			throw {status : 404, message : message}
+		bad_request : function(message){
+			throw {status : 400, message : message || "Bad request"}
+		},
+		not_found : function(message){
+			throw {status : 404, message : message || "Not Found"}
 		}
 	}
 	return services;
