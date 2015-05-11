@@ -1,3 +1,5 @@
+var statusCodesHandlers = {};
+
 module.exports = {
 	addRestResource: function(path, handler) {
 		global.__wires_resources__ = global.__wires_resources__ || [];
@@ -15,6 +17,9 @@ module.exports = {
 		return global.__wires_services__ || {};
 	},
 	getRestResources: function() {
+		return global.__wires_resources__ || [];
+	},
+	setStatusHandler: function() {
 		return global.__wires_resources__ || [];
 	}
 }
