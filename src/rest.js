@@ -25,70 +25,79 @@ var getResourceCandidate = function(resources, startIndex, url) {
 
 // Register local services
 // Will be available only on rest service construct
-var restLocalServices = function(info, params, req, res){
+var restLocalServices = function(info, params, req, res) {
 	var services = {
-		$req: req,
-		$res: res,
-		$params: params,
-		// Next function tries to get next
-		$next: function() {
-			return function() {
-				var resources = scope.getRestResources();
-				var data = getResourceCandidate(resources, info.nextIndex, req.path);
-				if (data) {
-					return callCurrentResource(data, req, res)
-				}
-			}
-		}
-	}
-	// Helper to validate required arguments
-	var required = function(){
-		var err;
-		_.each(arguments, function(item){
-			if (_.isString(item)){
-				if ( !this[item] ){
-					return err = { status : 400, message : item + " is required"}
-				}
-			}
-			// If it's a dictionary with options
-			if ( _.isPlainObject(item ) ){
-				_.each(item, function(funcValidate,k){
-					// Assume k - is query's argument
-					// v should be a function
-					if ( _.isFunction(funcValidate) && _.isString(k) ){
-						this[k] = funcValidate(this[k])
+			$req: req,
+			$res: res,
+			$params: params,
+			// Next function tries to get next
+			$next: function() {
+				return function() {
+					var resources = scope.getRestResources();
+					var data = getResourceCandidate(resources, info.nextIndex, req.path);
+					if (data) {
+						return callCurrentResource(data, req, res)
 					}
-				}, this);
+				}
 			}
-		}, this);
+		}
+		// Helper to validate required arguments
+	var required = function() {
+			var err;
+			_.each(arguments, function(item) {
+				if (_.isString(item)) {
+					if (!this[item]) {
+						return err = {
+							status: 400,
+							message: item + " is required"
+						}
+					}
+				}
+				// If it's a dictionary with options
+				if (_.isPlainObject(item)) {
+					_.each(item, function(funcValidate, k) {
+						// Assume k - is query's argument
+						// v should be a function
+						if (_.isFunction(funcValidate) && _.isString(k)) {
+							this[k] = funcValidate(this[k])
+						}
+					}, this);
+				}
+			}, this);
 
-		if ( err ){
-			throw err;
+			if (err) {
+				throw err;
+			}
 		}
-	}
-	// Body
+		// Body
 	services.$body = {
-		require : required.bind(req.body),
-		attrs : req.body,
-		getAttributes : function(){
-			return req.body;
+			require: required.bind(req.body),
+			attrs: req.body,
+			getAttributes: function() {
+				return req.body;
+			}
 		}
-	}
-	// Query
+		// Query
 	services.$query = {
-		require : required.bind(req.query),
-		attrs : req.query,
-		getAttributes : function(){
-			return req.query;
+			require: required.bind(req.query),
+			attrs: req.query,
+			getAttributes: function() {
+				return req.query;
+			}
 		}
-	}
-	// Assertion codes
+		// Assertion codes
 	services.$assert = {
-		bad_request : function(message){
-			throw {status : 400, message : message || "Bad request"}
+		bad_request: function(message) {
+			throw {
+				status: 400,
+				message: message || "Bad request"
+			}
 		},
-		not_found : function(message){
-			throw {status : 404, message : message || "Not Found"}
+		not_found: function(message) {
+			throw {
+				status: 404,
+				message: message || "Not Found"
+			}
 		}
 	}
 	return services;
@@ -111,24 +120,26 @@ var callCurrentResource = function(info, req, res) {
 		}
 	});
 
-	
+
 	// Define method name
 	var method = req.method.toLowerCase();
 
 	// Allow to define free style method for access
-	if ( mergedParams.action ){
+	if (mergedParams.action) {
 		method = mergedParams.action;
 	}
 
 
 	// Define parse options
 	var parseOptions;
-	
+
 	if (_.isPlainObject(handler)) {
 		if (handler[method]) {
-			parseOptions = handler[method]
-		} else {
-			
+			parseOptions = {
+				source: handler[method],
+				target: handler[method],
+				instance: handler
+			}
 		}
 	}
 
@@ -137,10 +148,14 @@ var callCurrentResource = function(info, req, res) {
 	}
 
 	// If there is nothing to execute
-	if ( !parseOptions)
-		return res.status(501).send({error : 501, message : "Not implemented"})
+	if (!parseOptions) {
+		return res.status(501).send({
+			error: 501,
+			message: "Not implemented"
+		})
+	}
 
-	
+
 	invoker.invoke(parseOptions, restLocalServices(info, mergedParams, req, res)).then(function(result) {
 		if (result !== undefined) {
 			res.send(result);
