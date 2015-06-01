@@ -60,11 +60,18 @@ module.exports = {
 
 			// call(func, callback)
 			if (args.length > 1) {
-				if (_.isFunction(args[1])) {
-					out.callReady = args[1];
-				}
-				if (_.isPlainObject(args[1])) {
-					out.localServices = args[1];
+				var argsDefined = _.isString(args[0]) || _.isArray(args[0])
+				if (argsDefined && _.isFunction(args[1])) {
+					out.source = _.isString(args[0]) ? [args[0]] : args[0]
+					out.target = args[1]
+				} else {
+
+					if (_.isFunction(args[1])) {
+						out.callReady = args[1];
+					}
+					if (_.isPlainObject(args[1])) {
+						out.localServices = args[1];
+					}
 				}
 			}
 			// call(func, {locals}, calback)
@@ -99,12 +106,16 @@ module.exports = {
 	 * @param {[type]} func [description]
 	 * @return {[type]}
 	 */
+	invokeOne: function(item, callback) {
+		console.log("here")
+	},
 	invoke: function() {
 
 
 		var data = this.getInputArguments(arguments);
 		var localServices = data.localServices;
-		var variables = getParamNames(data.source);
+
+		var variables = _.isArray(data.source) ? data.source : getParamNames(data.source);
 		var target = data.target;
 		var callReady = data.callReady;
 		var instance = data.instance;

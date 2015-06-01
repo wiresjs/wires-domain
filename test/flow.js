@@ -81,6 +81,21 @@ describe('Work flow', function() {
 		})
 	});
 
+	it('Should require one from string', function(done) {
+		domain.require('$a', function($a) {
+			$a.should.be.equal("Response from $a")
+			done();
+		});
+	});
+
+	it('Should require couple from string', function(done) {
+		domain.require(['$a', '$c'], function($a, $c) {
+			$a.should.be.equal("Response from $a")
+			$c.a.should.be.equal("Response from $a")
+			done();
+		});
+	});
+
 	it('Should call service with one dependency', function(done) {
 		domain.require(function($b) {
 			$b.should.be.equal("Response from $a")
