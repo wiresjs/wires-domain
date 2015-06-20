@@ -48,34 +48,9 @@ exports.express = function() {
 	return rest;
 };
 
-/*
-
-
-var promises = [];
-			_.each(funcCollection, function(f) {
-				promises.push(function(callback) {
-					var curFunction = f;
-					if (thisArg) {
-						curFunction = f.bind(thisArg);
-					}
-					new Promise(curFunction).then(function(res) {
-						callback(null, res);
-					}).catch(function(e) {
-						callback(e, null);
-					});
-				});
-			});
-			async.series(promises, function(err, results) {
-				if (err !== undefined) {
-					return reject(err);
-				} else {
-					return resolve(results);
-				}
-			})
-
-
- */
-
+exports.isServiceRegistered = function(serviceName) {
+	return scope.getService(serviceName) !== undefined;
+}
 
 exports.each = function(arr, cb) {
 	return new Promise(function(resolve, reject) {

@@ -16,6 +16,10 @@ module.exports = {
 	getServices: function() {
 		return global.__wires_services__ || {};
 	},
+	getService: function(name) {
+		var services = global.__wires_services__ || {}
+		return services[name];
+	},
 	getRestResources: function() {
 		return global.__wires_resources__ || [];
 	},
