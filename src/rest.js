@@ -93,6 +93,12 @@ var restLocalServices = function(info, params, req, res) {
 				message: message || "Bad request"
 			}
 		},
+		unauthorized: function(message) {
+			throw {
+				status: 401,
+				message: message || "Unauthorized"
+			}
+		},
 		not_found: function(message) {
 			throw {
 				status: 404,
@@ -104,7 +110,7 @@ var restLocalServices = function(info, params, req, res) {
 }
 
 var callCurrentResource = function(info, req, res) {
-	// Extract params 
+	// Extract params
 	var mergedParams = {};
 	var params = info.params;
 	var handler = info.handler;
