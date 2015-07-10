@@ -1,12 +1,13 @@
 wires-domain
 ============
 
-Restful Service for express.js with dependency injection.
+# An ambitious dependency injection for your project
+
 
 ## Installation
 
 	npm install wires-domain --save
-	
+
 ## Services
 
 Define few services
@@ -17,7 +18,7 @@ Define few services
 	domain.service("$b", function($a) {
 		return $a
 	});
-	
+
 Now we can call service "$b", that returns results from service "$a"
 
 	domain.require(function($b) {
@@ -31,14 +32,11 @@ For more example see test/flow.js
 ### Asynchronous
 
 	domain.service("$wait", function() {
-		return domain.promise(function(resolve, reject) {
-			resolve("Some async result")	
+		return new Promise(function(resolve, reject) {
+			resolve("Some async result")
 		})
 	});
 
-you can also use promise directly
-
-       new Promise(function(resolve, reject){})
 
 ## Factories
 
@@ -86,39 +84,39 @@ Connect with express.js
 ## Restfull example
 
 	var domain = require('wires-domain');
-	domain.path("/:id?", domain.BaseResource.extend({
-		index: function($res, $params) {
+	domain.path("/:id?", {{
+		get: function($res, $params) {
 			$res.send({ id : $params.id } )
 		}
-	}));
+	});
 
 All matched paramaters are combined into "$params" injection
 
-### Restful method
+### Restful methods
 
 	// GET
-    index: function($res) {
+    get: function($res) {
 		throw {
 			status: 505,
 			message: 'Not implemented'
 		};
 	},
 	// POST
-	add: function($res) {
+	post: function($res) {
 		throw {
 			status: 505,
 			message: 'Not implemented'
 		}
 	},
 	// PUT
-	update: function($res) {
+	put: function($res) {
 		throw {
 			status: 505,
 			message: 'Not implemented'
 		}
 	},
 	// DELETE
-	remove: function() {
+	delete: function() {
 		throw {
 			status: 505,
 			message: 'Not implemented'
@@ -141,28 +139,26 @@ matched parameters from the url
 It is possible to try next candidate. Note, that this is not express "next" function.
 Let's check an example:
 
-	domain.path("/", domain.BaseResource.extend({
-		index: function($res, $nice, $next) {
+	domain.path("/", {
+		get: function($res, $nice, $next) {
 			$next();
 			//$res.send("First")
 		}
-	}));
-	
-	domain.path("/", domain.BaseResource.extend({
-		index: function($res) {
+	});
+
+	domain.path("/",{
+		get: function($res) {
 			$res.send("Second")
 		}
-	}));
+	});
 
 
 ## Exceptions
 
-Any exception can be thrown. If an object is a dictionary and it containes "status" key, that will be taken as a http code response. You can combine it with "message"
+Any exception can be thrown. If an object is a dictionary and it contains "status" key, that will be taken as a http code response. You can combine it with "message"
 
      domain.service("$a", function($params.id) {
 		if ( $params.id === 5 ){
 			throw {status : 400, message "You can't access this item"}
 		}
      });
-
-

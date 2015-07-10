@@ -35,6 +35,7 @@ domain.service("$e", function($local) {
 });
 
 domain.service("$someFactory", function() {
+
 	return domain.Factory.extend({
 		init: function() {},
 		someMethod: function() {
@@ -132,9 +133,10 @@ describe('Work flow', function() {
 			$e.should.be.equal("hello")
 
 		}).then(function() {
-
+			done("Should not come here")
 		}).catch(function(err) {
-			err.code.should.be.equal(400)
+
+			err.status.should.be.equal(500)
 			done();
 		});
 	});

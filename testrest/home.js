@@ -1,21 +1,36 @@
 var domain = require('../index');
+var Promise = require("promise")
+domain.service("$a", function() {
+	return new Promise(function(resolve, reject) {
+		setTimeout(function() {
+			resolve({
+				test: "myasynce"
+			})
+		}, 500)
+	})
 
+})
 
-domain.path("/:action?", {
-	get : function($res, $query, $assert){
-		
-		$query.require('id', 'name')
-
-		
-		//$assert.notfound('THis bloody shit was not found')
-		return domain.promise(function(resolve){
-
-			resolve($query.attrs)
-		});
+domain.path("/hello/:id", {
+	get: function($res, $params) {
+		$res.send($params)
 	},
-	pukka : function($res, $next){
-		$res.send({hello : "from pukka"})
+	post: function($res, $body) {
+		$res.send($body.attrs)
+	}
+});
 
+domain.path("/", {
+	get: function($res, $query, $auth, $assert) {
+		$auth.validate();
+		i++;
+		//$query.require('id', 'name')
+		return $query.attrs;
+	},
+	pukka: function($res, $next) {
+		$res.send({
+			hello: "from test"
+		})
 	}
 });
 /*domain.path("/", domain.BaseResource.extend({
