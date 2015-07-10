@@ -80,7 +80,7 @@ var Require = {
    },
    // Depricated method
    register: function() {
-      this.service.apply(this, argument)
+      this.service.apply(this, arguments)
    },
    isServiceRegistered: function(name) {
       return global.__wires_services__ && global.__wires_services__[name] !== undefined;
