@@ -9,6 +9,14 @@ module.exports = function(arr, cb) {
       var promises = [];
       _.each(arr, function(v, k) {
          promises.push(function(callback) {
+
+            if ( !cb && v instanceof Promise ){
+               return v.then(function(r){
+                  callback(null, r)
+               }).catch(function(e){
+                  callback(e,null)
+               })
+            }
             var cbRes;
             try {
                cbRes = cb(v, k);
