@@ -5,6 +5,9 @@ var Class = require('wires-class');
 var async = require('async');
 var Promise = require("promise");
 
+var isPromise = function(v) {
+   return _.isFunction(v.then) && _.isFunction(v.catch);
+};
 
 //Extract parameter names from a function
 var getParamNames = function(func) {
@@ -63,7 +66,6 @@ var getInputArguments = function(args) {
 
 // Register local services
 // Will be available only on rest service construct
-
 
 var Require = {
    // Factory constructor
@@ -191,6 +193,5 @@ var Require = {
       });
    }
 }
-
 
 module.exports = Require;

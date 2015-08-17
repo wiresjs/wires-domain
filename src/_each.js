@@ -1,6 +1,10 @@
 var Promise = require("promise");
-var _ = require('lodash')
+var _ = require('lodash');
 var async = require("async");
+
+var isPromise = function(v) {
+   return _.isFunction(v.then) && _.isFunction(v.catch);
+};
 
 // Smart Each iterator
 // Understands returned promises
@@ -10,25 +14,25 @@ module.exports = function(arr, cb) {
       _.each(arr, function(v, k) {
          promises.push(function(callback) {
 
-            if ( !cb && v instanceof Promise ){
-               return v.then(function(r){
-                  callback(null, r)
-               }).catch(function(e){
-                  callback(e,null)
-               })
+            if (!cb && isPromise(v)) {
+               return v.then(function(r) {
+                  callback(null, r);
+               }).catch(function(e) {
+                  callback(e, null);
+               });
             }
             var cbRes;
             try {
                cbRes = cb(v, k);
             } catch (e) {
-               return callback(e, null)
+               return callback(e, null);
             }
-            if (cbRes instanceof Promise) {
+            if (isPromise(cbRes)) {
                cbRes.then(function(r) {
                   callback(null, r);
                }).catch(function(e) {
                   callback(e);
-               })
+               });
             } else {
                process.nextTick(function() {
                   callback(null, cbRes);
@@ -42,6 +46,6 @@ module.exports = function(arr, cb) {
          } else {
             return resolve(results);
          }
-      })
+      });
    });
-}
+};
