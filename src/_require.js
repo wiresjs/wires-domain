@@ -4,7 +4,7 @@ var Promise = require('promise');
 var Class = require('wires-class');
 var async = require('async');
 var Promise = require("promise");
-
+var domainEach = require("./_each.js");
 var isPromise = function(v) {
    return _.isFunction(v.then) && _.isFunction(v.catch);
 };
@@ -18,7 +18,7 @@ var getParamNames = function(func) {
    if (result === null)
       result = [];
    return result;
-}
+};
 
 // Extracts arguments and defined target for the require function
 var getInputArguments = function(args) {
@@ -29,17 +29,28 @@ var getInputArguments = function(args) {
       out.target = args[0];
       if (_.isPlainObject(args[0])) {
          var opts = args[0];
-         out.target = opts.target
-         out.source = opts.source
-         out.instance = opts.instance
+         out.target = opts.target;
+         out.source = opts.source;
+         out.instance = opts.instance;
       }
+
       // call(func, callback)
       if (args.length > 1) {
-         var argsDefined = _.isString(args[0]) || _.isArray(args[0])
-         if (argsDefined && _.isFunction(args[1])) {
-            out.source = _.isString(args[0]) ? [args[0]] : args[0]
-            out.target = args[1]
+         var argsDefined = _.isString(args[0]) || _.isArray(args[0]);
+         if (argsDefined) {
+            if (_.isArray(args[0])) {
+               out.source = args[0];
+            } else {
+               out.source = _.isString(args[0]) ? [args[0]] : args[0];
+            }
+            if (_.isFunction(args[1])) {
+               out.target = args[1];
+            }
+            if (_.isFunction(args[2])) {
+               out.target = args[2];
+            }
          } else {
+
             if (_.isFunction(args[1])) {
                out.callReady = args[1];
             }
@@ -48,21 +59,20 @@ var getInputArguments = function(args) {
             }
          }
       }
-      // call(func, {locals}, calback)
       if (args.length === 3) {
          if (_.isPlainObject(args[1])) {
             out.localServices = args[1];
          }
          if (_.isFunction(args[2])) {
-            out.callReady = args[2]
+            out.callReady = args[2];
          }
       }
    }
-   out.target = out.target || function() {}
+   out.target = out.target || function() {};
    out.source = out.source ? out.source : out.target;
    out.callReady = out.callReady || function() {};
    return out;
-}
+};
 
 // Register local services
 // Will be available only on rest service construct
@@ -75,123 +85,94 @@ var Require = {
    }, {
       __domain_factory__: true
    }),
-   // register new service
-   service: function(name, handler) {
-      global.__wires_services__ = global.__wires_services__ || {};
-      global.__wires_services__[name] = handler;
+
+   service: function() {
+      this.register.apply(this, arguments);
    },
-   // Depricated method
-   register: function() {
-      this.service.apply(this, arguments)
+   register: function(name, arg1, arg2) {
+      var localArgs = null;
+      var target = arg1;
+      if (_.isArray(arg1)) {
+         localArgs = arg1;
+         target = arg2;
+      }
+      global.__wires_services__ = global.__wires_services__ || {};
+      global.__wires_services__[name] = {
+         target: target,
+         args: localArgs
+      };
    },
    isServiceRegistered: function(name) {
       return global.__wires_services__ && global.__wires_services__[name] !== undefined;
    },
-   construct: function(avialableServices, fr, done) {
-
-      var domainModelInstance = new fr();
-
-      this.require({
-         source: fr.prototype.init,
-         target: domainModelInstance["init"],
-         instance: domainModelInstance
-      }, avialableServices).then(function(result) {
-         done(null, domainModelInstance)
-      }).catch(function(e) {
-         done(e);
-      });
-   },
    promise: function(cb) {
       return new Promise(cb);
    },
-   // domain require
    require: function() {
       var data = getInputArguments(arguments);
-      var localServices = data.localServices;
 
+      var self = this;
+      var localServices = data.localServices;
       var variables = _.isArray(data.source) ? data.source : getParamNames(data.source);
+
       var target = data.target;
       var callReady = data.callReady;
       var instance = data.instance;
       var globalServices = global.__wires_services__;
-      var self = this;
 
-      return new Promise(function(resolve, reject) {
+      var resultPromise = new Promise(function(resolve, reject) {
          var args = [];
          var avialableServices = _.merge(localServices, globalServices);
+
          for (var i in variables) {
+            var v = variables[i];
             var variableName = variables[i];
             if (!avialableServices[variableName]) {
-               logger.fatal("Error while injecting variable '" + variableName + "' into function \n" + data
-                  .source.toString());
+               logger.fatal("Error while injecting variable '" + variableName + "' into function \n" +
+                  data.source.toString());
                return reject({
                   status: 500,
-                  message: "Service with name '" + variableName + "'' was not found "
+                  message: "Service with name '" + variableName + "' was not found "
                });
             }
             args.push(avialableServices[variableName]);
          }
+
          var results = [];
-         async.eachSeries(args, function(argService, next) {
+         return domainEach(args, function(item) {
+            var argService = item.target;
+            var requiredArgs = item.args;
+
             if (_.isFunction(argService)) {
-               self.require(argService, localServices).then(function(r) {
-                  results.push(r)
-                  next(null);
-               }).catch(function(e) {
-                  next(e);
+               var promised;
+               var currentArgs = [];
+               if (requiredArgs) {
+                  currentArgs = [requiredArgs, localServices, argService];
+               } else {
+                  currentArgs = [argService, localServices];
+               }
+               return self.require.apply(self, currentArgs).then(function(dest) {
+                  if (dest && dest.__domain_factory__) {
+                     var inst = new dest();
+                     return self.require({
+                        source: dest.prototype.init,
+                        target: inst.init,
+                        instance: inst
+                     }, avialableServices).then(function() {
+                        return inst;
+                     });
+                  }
+                  return dest;
                });
             } else {
-               results.push(argService);
-               next();
+               return argService || item;
             }
-         }, function(err) {
-            if (err) {
-               // Globally if error happenes, stop it here, before calling function
-               return reject(err);
-            }
-            // Resolving promises if defined
-            var fr;
-            try {
-               fr = target.apply(instance || results, results);
-            } catch (e) {
-               logger.info(e);
-               return reject(e)
-            }
-            if (_.isObject(fr)) {
-               // Check special property of a function to destinuish if it's out guy
-               var isDomainModel = fr.__domain_factory__;
-               if (isDomainModel) {
-
-                  // Construct model and init it
-                  self.construct(avialableServices, fr, function(err, newinstance) {
-                     if (err) {
-                        return reject(err);
-                     } else {
-
-                        return resolve(newinstance);
-                     }
-                  });
-               } else {
-                  var isPromise = _.isFunction(fr["then"]) && _.isFunction(fr["catch"]);
-
-                  if (isPromise) {
-                     fr.then(function(res) {
-                        return resolve(res);
-                     });
-                     fr.catch(function(e) {
-                        logger.info(e);
-                        return reject(e);
-                     })
-                  } else {
-                     return resolve(fr);
-                  }
-               }
-            } else {
-               return resolve(fr);
-            };
-         });
+         }).then(function(results) {
+            return target.apply(instance || results, results);
+         }).then(resolve).catch(reject);
       });
+      return resultPromise;
    }
-}
+};
 
 module.exports = Require;

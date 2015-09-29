@@ -8,44 +8,46 @@ var isPromise = function(v) {
 
 // Smart Each iterator
 // Understands returned promises
-module.exports = function(arr, cb) {
-   return new Promise(function(resolve, reject) {
-      var promises = [];
-      _.each(arr, function(v, k) {
-         promises.push(function(callback) {
+module.exports = function(argv, cb) {
 
-            if (!cb && isPromise(v)) {
-               return v.then(function(r) {
-                  callback(null, r);
-               }).catch(function(e) {
-                  callback(e, null);
-               });
-            }
-            var cbRes;
-            try {
-               cbRes = cb(v, k);
-            } catch (e) {
-               return callback(e, null);
-            }
-            if (isPromise(cbRes)) {
-               cbRes.then(function(r) {
-                  callback(null, r);
-               }).catch(function(e) {
-                  callback(e);
-               });
+   return new Promise(function(resolve, reject) {
+      var callbacks = [];
+      var results = [];
+      var isObject = _.isPlainObject(argv);
+      var index = -1;
+      var iterate = function() {
+         index++;
+         if (index < _.size(argv)) {
+            var key;
+            var value;
+            if (isObject) {
+               key = _.keys(argv)[index];
+               value = argv[key];
             } else {
-               process.nextTick(function() {
-                  callback(null, cbRes);
-               });
+               key = index;
+               value = argv[index];
             }
-         });
-      });
-      async.series(promises, function(err, results) {
-         if (err !== undefined) {
-            return reject(err);
+            if (isPromise(value)) {
+               value.then(function(data) {
+                  results.push(data);
+                  iterate();
+               }).catch(reject);
+            } else {
+               var res = cb.call(cb, value, key);
+               if (isPromise(res)) {
+                  res.then(function(a) {
+                     results.push(a);
+                     iterate();
+                  }).catch(reject);
+               } else {
+                  results.push(res);
+                  iterate();
+               }
+            }
          } else {
             return resolve(results);
          }
-      });
+      };
+      iterate();
    });
 };
