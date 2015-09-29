@@ -8,6 +8,7 @@ var Promise = require("promise");
 var RestFul = [];
 
 var getResourceCandidate = function(resources, startIndex, url) {
+   console.log("-->", startIndex, url);
    for (var i = startIndex; i < resources.length; i++) {
       var item = resources[i];
       var keys = [];
@@ -19,98 +20,97 @@ var getResourceCandidate = function(resources, startIndex, url) {
             keys: keys,
             handler: item.handler,
             nextIndex: i + 1
-         }
+         };
       }
    }
-}
+};
 
 // Register local services
 // Will be available only on rest service construct
 var restLocalServices = function(info, params, req, res) {
    var services = {
-         $req: req,
-         $res: res,
-         $params: params,
-         // Next function tries to get next
-         $next: function() {
-            return function() {
-               var resources = RestFul;
-               var data = getResourceCandidate(resources, info.nextIndex, req.path);
-               if (data) {
-                  return callCurrentResource(data, req, res)
-               }
-            }
+      $req: req,
+      $res: res,
+      $params: params,
+      // Next function tries to get next
+      $next: function() {
+         var resources = RestFul;
+         var data = getResourceCandidate(resources, info.nextIndex, req.path);
+         if (data) {
+            return callCurrentResource(data, req, res);
          }
       }
-      // Helper to validate required arguments
+   };
+   // Helper to validate required arguments
    var required = function() {
-         var err;
-         _.each(arguments, function(item) {
-            if (_.isString(item)) {
-               if (!this[item]) {
-                  return err = {
-                     status: 400,
-                     message: item + " is required"
-                  }
+      var err;
+      _.each(arguments, function(item) {
+         if (_.isString(item)) {
+            if (!this[item]) {
+               return {
+                  status: 400,
+                  message: item + " is required"
+               };
+            }
+         }
+         // If it's a dictionary with options
+         if (_.isPlainObject(item)) {
+            _.each(item, function(funcValidate, k) {
+               // Assume k - is query's argument
+               // v should be a function
+               if (_.isFunction(funcValidate) && _.isString(k)) {
+                  this[k] = funcValidate(this[k]);
                }
-            }
-            // If it's a dictionary with options
-            if (_.isPlainObject(item)) {
-               _.each(item, function(funcValidate, k) {
-                  // Assume k - is query's argument
-                  // v should be a function
-                  if (_.isFunction(funcValidate) && _.isString(k)) {
-                     this[k] = funcValidate(this[k])
-                  }
-               }, this);
-            }
-         }, this);
+            }, this);
+         }
+      }, this);
 
-         if (err) {
-            throw err;
-         }
+      if (err) {
+         throw err;
       }
-      // Body
+   };
+   // Body
    services.$body = {
-         require: required.bind(req.body),
-         attrs: req.body,
-         getAttributes: function() {
-            return req.body;
-         }
+      require: required.bind(req.body),
+      attrs: req.body,
+      getAttributes: function() {
+         return req.body;
       }
-      // Query
+   };
+   // Query
    services.$query = {
-         require: required.bind(req.query),
-         attrs: req.query,
-         getAttributes: function() {
-            return req.query;
-         }
+      require: required.bind(req.query),
+      attrs: req.query,
+      getAttributes: function() {
+         return req.query;
       }
-      // Assertion codes
+   };
+   // Assertion codes
    services.$assert = {
       bad_request: function(message) {
          throw {
             status: 400,
             message: message || "Bad request"
-         }
+         };
       },
       unauthorized: function(message) {
          throw {
             status: 401,
             message: message || "Unauthorized"
-         }
+         };
       },
       not_found: function(message) {
          throw {
             status: 404,
             message: message || "Not Found"
-         }
+         };
       }
-   }
+   };
    return services;
-}
+};
 
 var callCurrentResource = function(info, req, res) {
+
    // Extract params
    var mergedParams = {};
    var params = info.params;
@@ -127,7 +127,6 @@ var callCurrentResource = function(info, req, res) {
       }
    });
 
-
    // Define method name
    var method = req.method.toLowerCase();
 
@@ -135,7 +134,6 @@ var callCurrentResource = function(info, req, res) {
    if (mergedParams.action) {
       method = mergedParams.action;
    }
-
 
    // Define parse options
    var parseOptions;
@@ -146,7 +144,7 @@ var callCurrentResource = function(info, req, res) {
             source: handler[method],
             target: handler[method],
             instance: handler
-         }
+         };
       }
    }
 
@@ -159,7 +157,7 @@ var callCurrentResource = function(info, req, res) {
       return res.status(501).send({
          error: 501,
          message: "Not implemented"
-      })
+      });
    }
 
    Require.require(parseOptions, restLocalServices(info, mergedParams, req, res)).then(function(result) {
@@ -179,24 +177,25 @@ var callCurrentResource = function(info, req, res) {
          }
       }
       res.status(err.status).send(err);
-      logger.fatal(e.stack || e)
+      logger.fatal(e.stack || e);
    });
-}
+};
 var express = function(req, res, next) {
    var resources = RestFul;
    var data = getResourceCandidate(resources, 0, req.path);
    if (!data) {
       return next();
    }
-   return callCurrentResource(data, req, res)
-}
+
+   return callCurrentResource(data, req, res);
+};
 
 var Path = function() {
    var handlers = [];
    var path;
    _.each(arguments, function(item) {
       if (!path) {
-         path = item
+         path = item;
       } else {
          handlers.push(item);
       }
@@ -207,11 +206,11 @@ var Path = function() {
          handler: handler
       });
    });
-}
+};
 
 module.exports = {
    express: function() {
       return express;
    },
    path: Path
-}
+};

@@ -5,43 +5,43 @@ domain.service("$a", function() {
 		setTimeout(function() {
 			resolve({
 				test: "myasynce"
-			})
-		}, 500)
-	})
+			});
+		}, 500);
+	});
 
-})
+});
 
 domain.path("/hello/:id", {
 	get: function($res, $params) {
-		$res.send($params)
+		$res.send($params);
 	},
 	post: function($res, $body) {
-		$res.send($body.attrs)
+		$res.send($body.attrs);
+	}
+});
+//
+// domain.path("/", {
+// 	get: function($res, $query, $auth, $assert) {
+// 		$auth.validate();
+// 		i++;
+// 		//$query.require('id', 'name')
+// 		return $query.attrs;
+// 	},
+// 	pukka: function($res, $next) {
+// 		$res.send({
+// 			hello: "from test"
+// 		})
+// 	}
+// });
+domain.path("/", {
+	get: function($res, $nice, $next) {
+		$next();
+		//$res.send("First");
 	}
 });
 
 domain.path("/", {
-	get: function($res, $query, $auth, $assert) {
-		$auth.validate();
-		i++;
-		//$query.require('id', 'name')
-		return $query.attrs;
-	},
-	pukka: function($res, $next) {
-		$res.send({
-			hello: "from test"
-		})
+	get: function($res) {
+		return "Second";
 	}
 });
-/*domain.path("/", domain.BaseResource.extend({
-	index: function($res, $nice, $next) {
-		$next();
-		//$res.send("First")
-	}
-}));
-
-domain.path("/", domain.BaseResource.extend({
-	index: function($res) {
-		return {}
-	}
-}));*/
