@@ -8,7 +8,7 @@ var Promise = require("promise");
 var RestFul = [];
 
 var getResourceCandidate = function(resources, startIndex, url) {
-   console.log("-->", startIndex, url);
+
    for (var i = startIndex; i < resources.length; i++) {
       var item = resources[i];
       var keys = [];
