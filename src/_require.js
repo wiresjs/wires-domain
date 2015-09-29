@@ -2,7 +2,6 @@ var logger = require("log4js").getLogger("domain");
 var _ = require("lodash");
 var Promise = require('promise');
 var Class = require('wires-class');
-var async = require('async');
 var Promise = require("promise");
 var domainEach = require("./_each.js");
 var isPromise = function(v) {

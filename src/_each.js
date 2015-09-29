@@ -1,6 +1,5 @@
 var Promise = require("promise");
 var _ = require('lodash');
-var async = require("async");
 
 var isPromise = function(v) {
    return v && _.isFunction(v.then) && _.isFunction(v.catch);
