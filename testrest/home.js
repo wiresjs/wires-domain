@@ -12,8 +12,9 @@ domain.service("$a", function() {
 });
 
 domain.path("/hello/:id", {
-	get: function($res, $params) {
-		$res.send($params);
+	get: function($res, $jsonp, $params) {
+
+		return $params;
 	},
 	post: function($res, $body) {
 		$res.send($body.attrs);

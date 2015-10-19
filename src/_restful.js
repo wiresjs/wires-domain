@@ -69,6 +69,10 @@ var restLocalServices = function(info, params, req, res) {
          throw err;
       }
    };
+   services.$jsonp = function(cbname) {
+      req.__jsonp_callback__ = cbname;
+   };
+
    // Body
    services.$body = {
       require: required.bind(req.body),
@@ -162,7 +166,15 @@ var callCurrentResource = function(info, req, res) {
 
    Require.require(parseOptions, restLocalServices(info, mergedParams, req, res)).then(function(result) {
       if (result !== undefined) {
-         res.send(result);
+         if (req.__jsonp_callback__) {
+            if (_.isPlainObject(result) || _.isArray(result)) {
+               res.setHeader('content-type', 'application/javascript');
+               var str = req.__jsonp_callback__ + "(" + JSON.stringify(result) + ")";
+               res.send(str);
+            }
+         } else {
+            res.send(result);
+         }
       }
    }).catch(function(e) {
       var err = {
