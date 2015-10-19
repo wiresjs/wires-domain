@@ -1,5 +1,5 @@
 var domain = require('../index');
-var Promise = require("promise")
+var Promise = require("promise");
 domain.service("$a", function() {
 	return new Promise(function(resolve, reject) {
 		setTimeout(function() {
@@ -13,7 +13,7 @@ domain.service("$a", function() {
 
 domain.path("/hello/:id", {
 	get: function($res, $jsonp, $params) {
-
+		$jsonp('callback');
 		return $params;
 	},
 	post: function($res, $body) {

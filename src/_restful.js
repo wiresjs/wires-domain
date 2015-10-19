@@ -70,7 +70,7 @@ var restLocalServices = function(info, params, req, res) {
       }
    };
    services.$jsonp = function(cbname) {
-      req.__jsonp_callback__ = cbname;
+      req.__jsonp_callback__ = cbname || "callback";
    };
 
    // Body
@@ -167,14 +167,19 @@ var callCurrentResource = function(info, req, res) {
    Require.require(parseOptions, restLocalServices(info, mergedParams, req, res)).then(function(result) {
       if (result !== undefined) {
          if (req.__jsonp_callback__) {
-            if (_.isPlainObject(result) || _.isArray(result)) {
-               res.setHeader('content-type', 'application/javascript');
-               var str = req.__jsonp_callback__ + "(" + JSON.stringify(result) + ")";
-               res.send(str);
+            var jsname;
+            if ((jsname = req.query[req.__jsonp_callback__])) {
+
+               if (jsname.match(/^[a-z]+/gmi)) {
+                  if (_.isPlainObject(result) || _.isArray(result)) {
+                     res.setHeader('content-type', 'application/javascript');
+                     var str = jsname + "(" + JSON.stringify(result) + ")";
+                     return res.send(str);
+                  }
+               }
             }
-         } else {
-            res.send(result);
          }
+         return res.send(result);
       }
    }).catch(function(e) {
       var err = {
