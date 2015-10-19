@@ -81,6 +81,11 @@ var restLocalServices = function(info, params, req, res) {
          return req.body;
       }
    };
+   services.$cors = function(domains) {
+      res.header("Access-Control-Allow-Origin", domains || "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+   };
+
    // Query
    services.$query = {
       require: required.bind(req.query),
