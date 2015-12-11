@@ -175,7 +175,7 @@ Body or Query can be pre processed.
 	
 			return {
 				myData: date,
-				isValid: isPukka
+				isValid: isValid
 			};
 		}
 	});
