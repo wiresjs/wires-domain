@@ -186,7 +186,7 @@ Set "required" parameter to validate presence of a parameter.
 
 	$query.get("name@required");
 
-?name should be defined. Empty string fill case an exception.
+?name should be defined. Empty string will cause an exception.
 
 ### int
 
@@ -194,11 +194,11 @@ Set "bool" parameter to get a valid number
 
 	$query.get("name@int");
 
-?name should be integer. Empty string fill case an exception.
+?name should be integer. Empty string will cause an exception.
 
 ### moment
 
-Set "moment" parameter to get date in moment format.
+Set "moment" parameter to get date in momentjs format.
 
 	$query.get("date@moment('MM-DD-YYYY')");
 
