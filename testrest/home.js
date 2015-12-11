@@ -12,12 +12,19 @@ domain.service("$a", function() {
 });
 
 domain.path("/hello/:id", {
+	options: function($req, $res) {
+		$res.header("Access-Control-Allow-Origin", "*");
+		$res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+	},
 	get: function($res, $jsonp, $params) {
 		$jsonp('callback');
 		return $params;
 	},
-	post: function($res, $body) {
-		$res.send($body.attrs);
+	post: function($res, $cors, $body) {
+		$cors();
+		return {
+			ok: "RESULT IS HERE!"
+		};
 	}
 });
 //
@@ -35,14 +42,13 @@ domain.path("/hello/:id", {
 // 	}
 // });
 domain.path("/", {
-	get: function($res, $nice, $next) {
-		$next();
-		//$res.send("First");
-	}
-});
+	get: function($res, $query, $nice, $next) {
+		var date = $query.get("name@required,moment('DD-MM-YYYY')");
+		var isPukka = $query.get("pukka@required,bool");
 
-domain.path("/", {
-	get: function($res) {
-		return "Second";
+		return {
+			date: date,
+			isPukka: isPukka
+		};
 	}
 });

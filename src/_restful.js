@@ -4,7 +4,8 @@ var Require = require('./_require');
 var Promise = require("promise");
 var logger = require("log4js").getLogger("domain");
 var Promise = require("promise");
-
+var Convinience = require("./_convenience");
+var moment = require("moment")
 var RestFul = [];
 
 var getResourceCandidate = function(resources, startIndex, url) {
@@ -69,6 +70,80 @@ var restLocalServices = function(info, params, req, res) {
          throw err;
       }
    };
+   var __get = function(opt, defaultValue) {
+      var s = opt.split("@");
+      var name = s[0];
+      var p = s[1];
+
+      var isRequired = false;
+      var intRequested = false;
+      var value = this[name];
+      var params = {};
+      if (p !== undefined) {
+         params = Convinience.parse(p, {
+            cache: true,
+            dict: true
+         });
+      };
+
+      if (params.required && (value === undefined || value === "")) {
+         throw {
+            status: 400,
+            message: params.required.attrs[0] || (name + " is required")
+         };
+      }
+
+      if (params.bool) {
+
+         if (value === undefined) {
+            return false;
+         }
+         value = value.toString();
+
+         if (value === "1" || value === "true") {
+            return true;
+         }
+         return false;
+      }
+      // momentjs
+      if (params.moment) {
+         var format = (params.moment.attrs[0] || "MM-DD-YYYY");
+         if (value !== undefined) {
+
+            try {
+               return moment(value, format);
+            } catch (e) {
+               throw {
+                  status: 400,
+                  message: "Invalid moment format. Expected (" + format + ")"
+               };
+            }
+         } else {
+            throw {
+               status: 400,
+               message: "Invalid moment format. Expected (" + format + ")"
+            };
+         }
+      }
+
+      // Integer validation
+      if (params.int) {
+         if (value !== undefined) {
+            value = value.toString();
+            if (!value.match(/^\d+$/)) {
+               throw {
+                  status: 400,
+                  message: name + " is in wrong format (int required)"
+               };
+            }
+            value = value * 1;
+         }
+      }
+      if (_.isFunction(defaultValue)) {
+         return defaultValue(value)
+      }
+      return value || defaultValue;
+   }
    services.$jsonp = function(cbname) {
       req.__jsonp_callback__ = cbname || "callback";
    };
@@ -77,6 +152,7 @@ var restLocalServices = function(info, params, req, res) {
    services.$body = {
       require: required.bind(req.body),
       attrs: req.body,
+      get: __get.bind(req.body),
       getAttributes: function() {
          return req.body;
       }
@@ -90,6 +166,7 @@ var restLocalServices = function(info, params, req, res) {
    services.$query = {
       require: required.bind(req.query),
       attrs: req.query,
+      get: __get.bind(req.query),
       getAttributes: function() {
          return req.query;
       }
@@ -203,6 +280,7 @@ var callCurrentResource = function(info, req, res) {
    });
 };
 var express = function(req, res, next) {
+
    var resources = RestFul;
    var data = getResourceCandidate(resources, 0, req.path);
    if (!data) {

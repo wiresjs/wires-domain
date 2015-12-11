@@ -1,6 +1,7 @@
 var Require = require("./src/_require.js")
 var Each = require("./src/_each.js");
 var Restful = require("./src/_restful");
+var Convinience = require("./src/_convenience");
 module.exports = {
 	// Core function
 	require: Require.require.bind(Require),
@@ -16,6 +17,8 @@ module.exports = {
 	promise: Require.promise.bind(Require),
 	// Register path
 	path: Restful.path,
+
+	convenience: Convinience,
 	// Express handler
 	express: Restful.express,
 	// Helpers*****
