@@ -170,11 +170,11 @@ Body or Query can be pre processed.
 
 	domain.path("/", {
 		get: function($res, $query, $nice, $next) {
-			var myData = $query.get("name@required,moment('DD-MM-YYYY')");
+			var myDate = $query.get("name@required,moment('DD-MM-YYYY')");
 			var isValid = $query.get("valid@bool");
 	
 			return {
-				myData: date,
+				myDate: myDate,
 				isValid: isValid
 			};
 		}
