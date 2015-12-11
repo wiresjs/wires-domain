@@ -162,3 +162,63 @@ Any exception can be thrown. If an object is a dictionary and it contains "statu
 			throw {status : 400, message "You can't access this item"}
 		}
      });
+
+## Magic Query getters
+
+Body or Query can be pre processed.
+
+
+	domain.path("/", {
+		get: function($res, $query, $nice, $next) {
+			var myData = $query.get("name@required,moment('DD-MM-YYYY')");
+			var isValid = $query.get("valid@bool");
+	
+			return {
+				myData: date,
+				isValid: isPukka
+			};
+		}
+	});
+	
+### required
+
+Set "required" parameter to validate presence of a parameter.
+
+	$query.get("name@required");
+
+?name should be defined. Empty string will cause an exception.
+
+### int
+
+Set "bool" parameter to get a valid number
+
+	$query.get("name@int");
+
+?name should be integer. Empty string will cause an exception.
+
+### moment
+
+Set "moment" parameter to get date in momentjs format.
+
+	$query.get("date@moment('MM-DD-YYYY')");
+
+?date will be transformed to moment object accordingly
+
+### bool
+
+Set "bool" parameter to case and retrived boolean parameter
+
+	$query.get("valid@bool");
+
+?valid "1" "true" is going to give true in the end. Anything else is false
+
+
+You can combing multiple parameters in one query and use $body as well.
+
+	$query.get("valid@required('I need this stuff.'),bool");
+
+
+
+
+	
+	
