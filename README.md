@@ -170,12 +170,12 @@ Body or Query can be pre processed.
 
 	domain.path("/", {
 		get: function($res, $query, $nice, $next) {
-			var myData = $query.get("name@required,moment('DD-MM-YYYY')");
+			var myDate = $query.get("name@required,moment('DD-MM-YYYY')");
 			var isValid = $query.get("valid@bool");
 	
 			return {
-				myData: date,
-				isValid: isPukka
+				myDate: myDate,
+				isValid: isValid
 			};
 		}
 	});
@@ -217,6 +217,11 @@ You can combing multiple parameters in one query and use $body as well.
 
 	$query.get("valid@required('I need this stuff.'),bool");
 
+### min && max
+
+First argument is the amount, second (optional) is a custom message.
+
+	var name = $body.get("info.name@min(5),max(10, 'Custom message')");
 
 
 
