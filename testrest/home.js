@@ -42,13 +42,14 @@ domain.path("/hello/:id", {
 // 	}
 // });
 domain.path("/", {
-	get: function($res, $query, $nice, $next) {
-		var date = $query.get("name@required,moment('DD-MM-YYYY')");
-		var isPukka = $query.get("pukka@required,bool");
+	post: function($res, $body, $nice, $next) {
+		//var date = $query.get("name@required,moment('DD-MM-YYYY')");
+		//var isPukka = $query.get("pukka@required,bool");
+		var infoName = $body.get("info.name@min(5),max(10, 'Custom message')");
 
 		return {
-			date: date,
-			isPukka: isPukka
+
+			infoName: infoName
 		};
 	}
 });

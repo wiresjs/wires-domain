@@ -77,7 +77,32 @@ var restLocalServices = function(info, params, req, res) {
 
       var isRequired = false;
       var intRequested = false;
-      var value = this[name];
+
+      var xpathSplit = name.split('.');
+      var value;
+      if (xpathSplit.length > 1) {
+         value = this[xpathSplit[0]];
+         console.log(value)
+         if (_.isPlainObject(value)) {
+            var valueValid = true;
+            for (var i = 1; i < xpathSplit.length; i++) {
+               if (valueValid === true) {
+                  var x = xpathSplit[i];
+                  if (value !== undefined) {
+                     value = value[x];
+                  } else {
+                     valueValid = false
+                  }
+               }
+            }
+         } else {
+            value = undefined;
+         }
+
+      } else {
+         value = this[name];
+      }
+
       var params = {};
       if (p !== undefined) {
          params = Convinience.parse(p, {
@@ -104,6 +129,28 @@ var restLocalServices = function(info, params, req, res) {
             return true;
          }
          return false;
+      }
+      if (params.min) {
+         var minSymols = (params.min.attrs[0] * 1 || 0);
+
+         if (value === undefined || value.toString().length < minSymols) {
+            var eMessage = params.min.attrs[1] || "Expected to have at least " + minSymols + " in " + name;
+            throw {
+               status: 400,
+               message: eMessage
+            };
+         }
+      }
+
+      if (params.max) {
+         var maxSymbols = (params.max.attrs[0] * 1 || 255);
+         if (value === undefined || value.toString().length > maxSymbols) {
+            var eMessage = params.max.attrs[1] || "Expected to have not more than " + maxSymbols + " in " + name;
+            throw {
+               status: 400,
+               message: eMessage
+            };
+         }
       }
       // momentjs
       if (params.moment) {
