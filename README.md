@@ -217,6 +217,11 @@ You can combing multiple parameters in one query and use $body as well.
 
 	$query.get("valid@required('I need this stuff.'),bool");
 
+### min && max
+
+First argument is the amount, second (optional) custom message.
+
+	var name = $body.get("info.name@min(5),max(10, 'Custom message')");
 
 
 
