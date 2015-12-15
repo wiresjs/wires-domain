@@ -82,7 +82,7 @@ var restLocalServices = function(info, params, req, res) {
       var value;
       if (xpathSplit.length > 1) {
          value = this[xpathSplit[0]];
-         console.log(value)
+
          if (_.isPlainObject(value)) {
             var valueValid = true;
             for (var i = 1; i < xpathSplit.length; i++) {
@@ -189,7 +189,7 @@ var restLocalServices = function(info, params, req, res) {
       if (_.isFunction(defaultValue)) {
          return defaultValue(value)
       }
-      return value || defaultValue;
+      return value !== undefined ? value : defaultValue;
    }
    services.$jsonp = function(cbname) {
       req.__jsonp_callback__ = cbname || "callback";
