@@ -154,7 +154,7 @@ var restLocalServices = function(info, params, req, res) {
       }
       // momentjs
       if (params.moment) {
-         var format = (params.moment.attrs[0] || "MM-DD-YYYY");
+         var format = params.moment.attrs[0];
          if (value !== undefined) {
 
             try {
@@ -162,13 +162,13 @@ var restLocalServices = function(info, params, req, res) {
             } catch (e) {
                throw {
                   status: 400,
-                  message: "Invalid moment format. Expected (" + format + ")"
+                  message: "Invalid moment format."
                };
             }
          } else {
             throw {
                status: 400,
-               message: "Invalid moment format. Expected (" + format + ")"
+               message: "Invalid moment format"
             };
          }
       }
