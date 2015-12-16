@@ -41,7 +41,21 @@ domain.path("/hello/:id", {
 // 		})
 // 	}
 // });
+
+domain.service("WiresAssertHandler", function() {
+	return function(msg) {
+		return new Promise(function(resolve, reject) {
+			return resolve({
+				ololo: 1,
+				originalMessage: msg
+			})
+		})
+	}
+});
 domain.path("/", {
+	get: function($assert) {
+		return $assert.handle("custom.message")
+	},
 	post: function($res, $body, $nice, $next) {
 		//var date = $query.get("name@required,moment('DD-MM-YYYY')");
 		//var isPukka = $query.get("pukka@required,bool");

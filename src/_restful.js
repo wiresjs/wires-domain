@@ -5,6 +5,7 @@ var Promise = require("promise");
 var logger = require("log4js").getLogger("domain");
 var Promise = require("promise");
 var Convinience = require("./_convenience");
+
 var moment = require("moment")
 var RestFul = [];
 
@@ -226,6 +227,12 @@ var restLocalServices = function(info, params, req, res) {
             message: message || "Bad request"
          };
       },
+      handle: function(message, code) {
+         throw {
+            status: code || 400,
+            handler: message || "errr.bad_request"
+         };
+      },
       unauthorized: function(message) {
          throw {
             status: 401,
@@ -242,6 +249,17 @@ var restLocalServices = function(info, params, req, res) {
    return services;
 };
 
+var getAssertHandler = function(_locals) {
+   return new Promise(function(resolve, reject) {
+      if (Require.isServiceRegistered("WiresAssertHandler")) {
+         return Require.require('WiresAssertHandler', _locals, function(WiresAssertHandler) {
+
+            return resolve(WiresAssertHandler);
+         });
+      }
+      return resolve();
+   })
+}
 var callCurrentResource = function(info, req, res) {
 
    // Extract params
@@ -318,6 +336,17 @@ var callCurrentResource = function(info, req, res) {
       if (_.isObject(e)) {
          err.status = e.status || 500;
          err.message = e.message || "Error";
+         if (e.handler) {
+            return getAssertHandler(restLocalServices(info, mergedParams, req, res)).then(function(
+               assertHandler) {
+               if (assertHandler) {
+                  return assertHandler(e).then(function(result) {
+                     return res.status(err.status).send(result);
+                  })
+               }
+               return res.status(err.status).send(e);
+            });
+         }
          if (e.details) {
             err.details = e.details;
          }
