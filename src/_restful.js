@@ -158,21 +158,22 @@ var restLocalServices = function(info, params, req, res) {
       // momentjs
       if (params.moment) {
          var format = params.moment.attrs[0];
+         var eMessage = params.moment.attrs[1] || "Invalid moment format.";
          if (value !== undefined) {
 
             try {
                return moment(value, format);
             } catch (e) {
-               spitError(400, "Invalid moment format.");
+               spitError(400, eMessage);
             }
          } else {
-            spitError(400, "Invalid moment format.");
+            spitError(400, eMessage);
          }
       }
 
       if (params.email) {
          if (value !== undefined) {
-            var eMessage = params.email.attrs[1] || "Email is in wrong format";
+            var eMessage = params.email.attrs[0] || "Email is in wrong format";
             var re =
                /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
             if (!re.test(value)) {
@@ -185,7 +186,7 @@ var restLocalServices = function(info, params, req, res) {
          var validateTelephoneRegEx =
             /(00|\+)(9[976]\d|8[987530]\d|6[987]\d|5[90]\d|42\d|3[875]\d|2[98654321]\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1)\d{3,14}$/;
          if (!validateTelephoneRegEx.test(value)) {
-            var eMessage = params.phone.attrs[1] || "Phone is in wrong format";
+            var eMessage = params.phone.attrs[0] || "Phone is in wrong format";
             spitError(400, eMessage);
          }
       }
@@ -193,9 +194,10 @@ var restLocalServices = function(info, params, req, res) {
       // Integer validation
       if (params.int) {
          if (value !== undefined) {
+            var eMessage = params.int.attrs[0] || (name + " is in wrong format (int required)");
             value = value.toString();
             if (!value.match(/^\d+$/)) {
-               spitError(400, name + " is in wrong format (int required)");
+               spitError(400, eMessage);
             }
             value = value * 1;
          }
