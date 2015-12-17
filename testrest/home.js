@@ -44,17 +44,20 @@ domain.path("/hello/:id", {
 
 domain.service("WiresAssertHandler", function() {
 	return function(msg) {
-		return new Promise(function(resolve, reject) {
-			return resolve({
-				ololo: 1,
-				originalMessage: msg
-			})
-		})
+		return {
+			custom: true,
+			msg: msg
+		}
 	}
 });
 domain.path("/", {
-	get: function($assert) {
-		return $assert.handle("custom.message")
+	get: function($query, $assert) {
+
+		var phone = $query.get("phone@phone");
+		console.log(phone)
+		return {
+			phone: phone
+		}
 	},
 	post: function($res, $body, $nice, $next) {
 		//var date = $query.get("name@required,moment('DD-MM-YYYY')");

@@ -46,13 +46,15 @@ var restLocalServices = function(info, params, req, res) {
    // Helper to validate required arguments
    var required = function() {
       var err;
+
       _.each(arguments, function(item) {
          if (_.isString(item)) {
             if (!this[item]) {
-               return {
+               err = {
                   status: 400,
                   message: item + " is required"
                };
+               return false;
             }
          }
          // If it's a dictionary with options
@@ -81,6 +83,15 @@ var restLocalServices = function(info, params, req, res) {
 
       var xpathSplit = name.split('.');
       var value;
+
+      var spitError = function(code, message) {
+         throw {
+            status: code || 400,
+            message: message,
+            validation: true
+         };
+      }
+
       if (xpathSplit.length > 1) {
          value = this[xpathSplit[0]];
 
@@ -113,10 +124,7 @@ var restLocalServices = function(info, params, req, res) {
       };
 
       if (params.required && (value === undefined || value === "")) {
-         throw {
-            status: 400,
-            message: params.required.attrs[0] || (name + " is required")
-         };
+         spitError(400, params.required.attrs[0] || (name + " is required"))
       }
 
       if (params.bool) {
@@ -136,10 +144,7 @@ var restLocalServices = function(info, params, req, res) {
 
          if (value === undefined || value.toString().length < minSymols) {
             var eMessage = params.min.attrs[1] || "Expected to have at least " + minSymols + " in " + name;
-            throw {
-               status: 400,
-               message: eMessage
-            };
+            spitError(400, eMessage)
          }
       }
 
@@ -147,10 +152,7 @@ var restLocalServices = function(info, params, req, res) {
          var maxSymbols = (params.max.attrs[0] * 1 || 255);
          if (value === undefined || value.toString().length > maxSymbols) {
             var eMessage = params.max.attrs[1] || "Expected to have not more than " + maxSymbols + " in " + name;
-            throw {
-               status: 400,
-               message: eMessage
-            };
+            spitError(400, eMessage);
          }
       }
       // momentjs
@@ -161,16 +163,30 @@ var restLocalServices = function(info, params, req, res) {
             try {
                return moment(value, format);
             } catch (e) {
-               throw {
-                  status: 400,
-                  message: "Invalid moment format."
-               };
+               spitError(400, "Invalid moment format.");
             }
          } else {
-            throw {
-               status: 400,
-               message: "Invalid moment format"
-            };
+            spitError(400, "Invalid moment format.");
+         }
+      }
+
+      if (params.email) {
+         if (value !== undefined) {
+            var eMessage = params.email.attrs[1] || "Email is in wrong format";
+            var re =
+               /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            if (!re.test(value)) {
+               spitError(400, eMessage);
+            }
+         }
+      }
+
+      if (params.phone) {
+         var validateTelephoneRegEx =
+            /(00|\+)(9[976]\d|8[987530]\d|6[987]\d|5[90]\d|42\d|3[875]\d|2[98654321]\d|9[8543210]|8[6421]|6[6543210]|5[87654321]|4[987654310]|3[9643210]|2[70]|7|1)\d{3,14}$/;
+         if (!validateTelephoneRegEx.test(value)) {
+            var eMessage = params.phone.attrs[1] || "Phone is in wrong format";
+            spitError(400, eMessage);
          }
       }
 
@@ -179,14 +195,12 @@ var restLocalServices = function(info, params, req, res) {
          if (value !== undefined) {
             value = value.toString();
             if (!value.match(/^\d+$/)) {
-               throw {
-                  status: 400,
-                  message: name + " is in wrong format (int required)"
-               };
+               spitError(400, name + " is in wrong format (int required)");
             }
             value = value * 1;
          }
       }
+
       if (_.isFunction(defaultValue)) {
          return defaultValue(value)
       }
@@ -233,6 +247,13 @@ var restLocalServices = function(info, params, req, res) {
             handler: message || "errr.bad_request"
          };
       },
+      validation: function(message) {
+         throw {
+            status: code || 400,
+            validation: true,
+            message: message || "errr.bad_request"
+         };
+      },
       unauthorized: function(message) {
          throw {
             status: 401,
@@ -253,7 +274,6 @@ var getAssertHandler = function(_locals) {
    return new Promise(function(resolve, reject) {
       if (Require.isServiceRegistered("WiresAssertHandler")) {
          return Require.require('WiresAssertHandler', _locals, function(WiresAssertHandler) {
-
             return resolve(WiresAssertHandler);
          });
       }
@@ -333,26 +353,40 @@ var callCurrentResource = function(info, req, res) {
          status: 500,
          message: "Error"
       };
-      if (_.isObject(e)) {
-         err.status = e.status || 500;
-         err.message = e.message || "Error";
-         if (e.handler) {
-            return getAssertHandler(restLocalServices(info, mergedParams, req, res)).then(function(
-               assertHandler) {
-               if (assertHandler) {
-                  return assertHandler(e).then(function(result) {
-                     return res.status(err.status).send(result);
-                  })
-               }
-               return res.status(err.status).send(e);
-            });
-         }
-         if (e.details) {
-            err.details = e.details;
-         }
-      }
-      res.status(err.status).send(err);
+
       logger.fatal(e.stack || e);
+      // If we have a direct error
+      if (e.stack) {
+         return res.status(500).send({
+            status: 500,
+            message: "Server Error"
+         });
+      }
+
+      if (_.isObject(e)) {
+
+         var status = e.status || 500;
+         e.message = e.message || "Server Error";
+         return getAssertHandler(restLocalServices(info, mergedParams, req, res)).then(function(
+            assertHandler) {
+            if (assertHandler) {
+               return assertHandler(e);
+            }
+            return e;
+         }).then(function(result) {
+            return res.status(status).send(result !== undefined ? result : err);
+         }).catch(function(e) {
+            logger.fatal(e.stack || e);
+            return res.status(500).send({
+               status: 500,
+               message: "Server Error"
+            });
+         })
+
+      }
+
+      res.status(err.status).send(err);
+
    });
 };
 var express = function(req, res, next) {
