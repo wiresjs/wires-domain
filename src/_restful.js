@@ -311,7 +311,7 @@ var callCurrentResource = function(info, req, res) {
    }
    // setting cors headers for any other method
    if (handler.cors) {
-      res.header("Access-Control-Allow-Origin", domains || "*");
+      res.header("Access-Control-Allow-Origin", "*");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
    }
 
