@@ -303,6 +303,18 @@ var callCurrentResource = function(info, req, res) {
    // Define method name
    var method = req.method.toLowerCase();
 
+   // check for cors option request
+   if (method === "options" && handler.cors === true) {
+      res.header("Access-Control-Allow-Origin", "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      return res.send({});
+   }
+   // setting cors headers for any other method
+   if (handler.cors) {
+      res.header("Access-Control-Allow-Origin", domains || "*");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+   }
+
    // Allow to define free style method for access
    if (mergedParams.action) {
       method = mergedParams.action;
