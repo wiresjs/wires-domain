@@ -9,6 +9,8 @@ module.exports = {
 	isServiceRegistered: Require.isServiceRegistered.bind(Require),
 	// Register new service
 	service: Require.service.bind(Require),
+
+	requirePackage: Require.requirePackage.bind(Require),
 	// Factory
 	Factory: Require.Factory,
 	// Register (service)

@@ -104,6 +104,21 @@ var Require = {
    isServiceRegistered: function(name) {
       return global.__wires_services__ && global.__wires_services__[name] !== undefined;
    },
+   requirePackage: function(name) {
+      var _packageServices = {}
+      var self = this;
+      return domainEach(global.__wires_services__, function(service, serviceName) {
+         var _package = serviceName.split(".")[0];
+
+         if (_package === name) {
+            return self.require([serviceName], function(serviceInstance) {
+               _packageServices[serviceName] = serviceInstance
+            })
+         }
+      }).then(function() {
+         return _packageServices;
+      });
+   },
    promise: function(cb) {
       return new Promise(cb);
    },

@@ -3,6 +3,13 @@ var domain = require('../index.js');
 var Class = require('wires-class');
 var Promise = require("promise");
 
+domain.service("ns.serviceA", function() {
+	return 1;
+});
+domain.service("ns.serviceB", function() {
+	return 2;
+});
+
 domain.service("$a", function() {
 	return "Response from $a";
 });
@@ -214,6 +221,15 @@ describe('Work flow', function() {
 		domain.require("$a", function(injectedVar) {
 			injectedVar.should.be.equal("Response from $a");
 		}).then(function() {
+			done();
+		});
+	});
+
+	it('Should require package', function(done) {
+
+		domain.requirePackage("ns").then(function(data) {
+			data['ns.serviceA'].should.equal(1);
+			data['ns.serviceB'].should.equal(2);
 			done();
 		});
 	});
