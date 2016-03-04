@@ -59,7 +59,6 @@ domain.path("/update", {
 domain.path("/", {
 	eTag: 'pukka',
 	get: function($query, $assert) {
-		console.log("!!!!!!!!!!!calling fucking pukka here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		return {
 			pukka: "sukka"
 		}
