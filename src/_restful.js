@@ -102,12 +102,13 @@ var restLocalServices = function(info, params, req, res) {
       }
    };
    // Helper to validate required arguments
+   // Helper to validate required arguments
    var required = function() {
       var err;
-
+      var self = this;
       _.each(arguments, function(item) {
          if (_.isString(item)) {
-            if (!this[item]) {
+            if (!self[item]) {
                err = {
                   status: 400,
                   message: item + " is required"
@@ -121,12 +122,11 @@ var restLocalServices = function(info, params, req, res) {
                // Assume k - is query's argument
                // v should be a function
                if (_.isFunction(funcValidate) && _.isString(k)) {
-                  this[k] = funcValidate(this[k]);
+                  self[k] = funcValidate(self[k]);
                }
-            }, this);
+            });
          }
-      }, this);
-
+      });
       if (err) {
          throw err;
       }
