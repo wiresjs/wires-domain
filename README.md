@@ -172,14 +172,14 @@ Body or Query can be pre processed.
 		get: function($res, $query, $nice, $next) {
 			var myDate = $query.get("name@required,moment('DD-MM-YYYY')");
 			var isValid = $query.get("valid@bool");
-	
+
 			return {
 				myDate: myDate,
 				isValid: isValid
 			};
 		}
 	});
-	
+
 ### required
 
 Set "required" parameter to validate presence of a parameter.
@@ -224,6 +224,34 @@ First argument is the amount, second (optional) is a custom message.
 	var name = $body.get("info.name@min(5),max(10, 'Custom message')");
 
 
+# ETags
 
-	
-	
+## Creating eTags
+
+Domain path supports eTags with convenient services;
+
+To start working with eTag, add eTag property to your rest end point
+
+	domain.path("/:lang?", {
+		eTag: 'landing-$lang',
+		get: function($query, $assert) {
+			return {
+				hello: "world"
+			}
+		}
+	})
+
+eTag name will be parser and formed based on url query or URL parameters per se.
+so, requesting /en will create an eTag called 'landing-en'
+
+## Updating eTags
+
+To update an eTag, simply require eTag service
+
+	domain.path("/update", {
+		get: function($eTag) {
+			return $eTag.generate('landing-en');
+		}
+	});
+
+$eTag.generate('landing-en') will generate new eTag!

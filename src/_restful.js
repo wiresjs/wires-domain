@@ -473,8 +473,17 @@ var callCurrentResource = function(info, req, res) {
    };
 
    if (handler.eTag && method === 'get') {
+      var tagName = handler.eTag;
       var tag = req.headers['if-none-match'];
-      return eTagProvider.status(handler.eTag, tag).then(function(status) {
+      var ps = _.merge(req.query, mergedParams);
+      for (var k in ps) {
+         var v = ps[k];
+         if (v !== undefined) {
+            tagName = tagName.split('$' + k).join(v);
+         }
+      }
+      console.log(tagName);
+      return eTagProvider.status(handler.eTag, tagName).then(function(status) {
          if (status.modified === true) {
             if (status.current) {
                res.setHeader('ETag', status.current);

@@ -56,8 +56,8 @@ domain.path("/update", {
 		return $eTag.generate('pukka');
 	}
 });
-domain.path("/", {
-	eTag: 'pukka',
+domain.path("/:lang?", {
+	eTag: 'pukka-$lang',
 	get: function($query, $assert) {
 		return {
 			pukka: "sukka"
