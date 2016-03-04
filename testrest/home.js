@@ -50,13 +50,18 @@ domain.service("WiresAssertHandler", function() {
 		}
 	}
 });
-domain.path("/", {
-	get: function($query, $assert) {
 
-		var phone = $query.get("phone@phone");
-		console.log(phone)
+domain.path("/update", {
+	get: function($eTag) {
+		return $eTag.generate('pukka');
+	}
+});
+domain.path("/", {
+	eTag: 'pukka',
+	get: function($query, $assert) {
+		console.log("!!!!!!!!!!!calling fucking pukka here!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
 		return {
-			phone: phone
+			pukka: "sukka"
 		}
 	},
 	post: function($res, $body, $nice, $next) {

@@ -1,6 +1,6 @@
 {
    "name": "wires-domain",
-   "version": "1.5.5",
+   "version": "1.5.6",
    "description": "Restfull service with dependency injection",
    "main": "index.js",
    "scripts": {
@@ -17,11 +17,12 @@
    "dependencies": {
       "app-root-path": "^1.0.0",
       "jsep": "^0.3.0",
-      "lodash": "^2.4.1",
+      "lodash": "^4.6.1",
       "log4js": "^0.6.21",
       "moment": "^2.10.6",
       "path-to-regexp": "^1.0.0",
       "promise": "^7.0.0",
+      "shortid": "^2.2.4",
       "wires-class": "^1.0.0"
    },
    "devDependencies": {

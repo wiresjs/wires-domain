@@ -5,9 +5,67 @@ var Promise = require("promise");
 var logger = require("log4js").getLogger("domain");
 var Promise = require("promise");
 var Convinience = require("./_convenience");
-
+var shortid = require('shortid');
 var moment = require("moment")
 var RestFul = [];
+
+// ETAG
+//
+//
+//
+
+var _eTagCollection = {};
+var ETagMemoryStorage = {
+   generate: function() {
+      return shortid.generate();
+   },
+   update: function(key, tag) {
+      return new Promise(function(resolve, reject) {
+         _eTagCollection[key] = tag;
+         return resolve({
+            key: tag
+         });
+      });
+   },
+   status: function(key, tag) {
+      return new Promise(function(resolve, reject) {
+         return resolve({
+            modified: _eTagCollection[key] === undefined ? true : _eTagCollection[key] !== tag,
+            current: _eTagCollection[key]
+         });
+      })
+   }
+}
+var getETagStorageProvider = function() {
+   return new Promise(function(resolve, reject) {
+      if (Require.isServiceRegistered('ETagCustomStorage')) {
+         return Require.require(function(ETagCustomStorage) {
+            return resolve(_.assignIn(ETagCustomStorage, ETagMemoryStorage));
+         });
+      }
+      return resolve(ETagMemoryStorage);
+   });
+}
+
+var eTagProvider = {
+   generate: function(key) {
+      return getETagStorageProvider().then(function(provider) {
+         var tag = provider.generate();
+         return provider.update(key, tag);
+      });
+   },
+   status: function(key, tag) {
+      var provider;
+      return getETagStorageProvider().then(function(_provider) {
+         provider = _provider;
+         return provider.status(key, tag);
+      });
+   }
+}
+
+Require.service('$eTag', function() {
+   return eTagProvider;
+});
 
 var getResourceCandidate = function(resources, startIndex, url) {
 
@@ -203,6 +261,18 @@ var restLocalServices = function(info, params, req, res) {
          }
       }
 
+      if (params.date) {
+         if (value !== undefined) {
+            var eMessage = params.date.attrs[0] || (name + " is in wrong format");
+            value = value.toString();
+            try {
+               value = new Date(value)
+            } catch (e) {
+               spitError(400, eMessage);
+            }
+         }
+      }
+
       if (_.isFunction(defaultValue)) {
          return defaultValue(value)
       }
@@ -221,6 +291,7 @@ var restLocalServices = function(info, params, req, res) {
          return req.body;
       }
    };
+
    services.$cors = function(domains) {
       res.header("Access-Control-Allow-Origin", domains || "*");
       res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
@@ -345,63 +416,80 @@ var callCurrentResource = function(info, req, res) {
       });
    }
 
-   Require.require(parseOptions, restLocalServices(info, mergedParams, req, res)).then(function(result) {
-      if (result !== undefined) {
-         if (req.__jsonp_callback__) {
-            var jsname;
-            if ((jsname = req.query[req.__jsonp_callback__])) {
+   var requireAndCallDestination = function() {
+      Require.require(parseOptions, restLocalServices(info, mergedParams, req, res)).then(function(result) {
+         if (result !== undefined) {
+            if (req.__jsonp_callback__) {
+               var jsname;
+               if ((jsname = req.query[req.__jsonp_callback__])) {
 
-               if (jsname.match(/^[a-z]+/gmi)) {
-                  if (_.isPlainObject(result) || _.isArray(result)) {
-                     res.setHeader('content-type', 'application/javascript');
-                     var str = jsname + "(" + JSON.stringify(result) + ")";
-                     return res.send(str);
+                  if (jsname.match(/^[a-z]+/gmi)) {
+                     if (_.isPlainObject(result) || _.isArray(result)) {
+                        res.setHeader('content-type', 'application/javascript');
+                        var str = jsname + "(" + JSON.stringify(result) + ")";
+                        return res.send(str);
+                     }
                   }
                }
             }
+            return res.send(result);
          }
-         return res.send(result);
-      }
-   }).catch(function(e) {
-      var err = {
-         status: 500,
-         message: "Error"
-      };
-
-      logger.fatal(e.stack || e);
-      // If we have a direct error
-      if (e.stack) {
-         return res.status(500).send({
+      }).catch(function(e) {
+         var err = {
             status: 500,
-            message: "Server Error"
-         });
-      }
+            message: "Error"
+         };
 
-      if (_.isObject(e)) {
-
-         var status = e.status || 500;
-         e.message = e.message || "Server Error";
-         return getAssertHandler(restLocalServices(info, mergedParams, req, res)).then(function(
-            assertHandler) {
-            if (assertHandler) {
-               return assertHandler(e);
-            }
-            return e;
-         }).then(function(result) {
-            return res.status(status).send(result !== undefined ? result : err);
-         }).catch(function(e) {
-            logger.fatal(e.stack || e);
+         logger.fatal(e.stack || e);
+         // If we have a direct error
+         if (e.stack) {
             return res.status(500).send({
                status: 500,
                message: "Server Error"
             });
-         })
+         }
 
-      }
+         if (_.isObject(e)) {
+            var status = e.status || 500;
+            e.message = e.message || "Server Error";
+            return getAssertHandler(restLocalServices(info, mergedParams, req, res)).then(function(
+               assertHandler) {
+               if (assertHandler) {
+                  return assertHandler(e);
+               }
+               return e;
+            }).then(function(result) {
+               return res.status(status).send(result !== undefined ? result : err);
+            }).catch(function(e) {
+               logger.fatal(e.stack || e);
+               return res.status(500).send({
+                  status: 500,
+                  message: "Server Error"
+               });
+            });
+         }
+         res.status(err.status).send(err);
+      });
+   };
 
-      res.status(err.status).send(err);
-
-   });
+   if (handler.eTag) {
+      var tag = req.headers['if-none-match'];
+      return eTagProvider.status(handler.eTag, tag).then(function(status) {
+         if (status.modified === true) {
+            if (status.current) {
+               res.setHeader('ETag', status.current);
+            }
+            return requireAndCallDestination();
+         } else {
+            if (status.current) {
+               res.setHeader('ETag', status.current);
+            }
+            return res.status(304).send('');
+         }
+      });
+   } else {
+      return requireAndCallDestination();
+   }
 };
 var express = function(req, res, next) {
 
