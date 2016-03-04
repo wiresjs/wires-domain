@@ -472,7 +472,7 @@ var callCurrentResource = function(info, req, res) {
       });
    };
 
-   if (handler.eTag) {
+   if (handler.eTag && method === 'get') {
       var tag = req.headers['if-none-match'];
       return eTagProvider.status(handler.eTag, tag).then(function(status) {
          if (status.modified === true) {
