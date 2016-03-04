@@ -14,14 +14,15 @@ var RestFul = [];
 //
 //
 
-var _eTagCollection = {};
+global.__wires_etags__ = global.__wires_etags__ || {};
+
 var ETagMemoryStorage = {
    generate: function() {
       return shortid.generate();
    },
    update: function(key, tag) {
       return new Promise(function(resolve, reject) {
-         _eTagCollection[key] = tag;
+         global.__wires_etags__[key] = tag;
          return resolve({
             key: tag
          });
@@ -30,8 +31,8 @@ var ETagMemoryStorage = {
    status: function(key, tag) {
       return new Promise(function(resolve, reject) {
          return resolve({
-            modified: _eTagCollection[key] === undefined ? true : _eTagCollection[key] !== tag,
-            current: _eTagCollection[key]
+            modified: global.__wires_etags__[key] === undefined ? true : global.__wires_etags__[key] !== tag,
+            current: global.__wires_etags__[key]
          });
       })
    }
@@ -482,14 +483,15 @@ var callCurrentResource = function(info, req, res) {
             tagName = tagName.split('$' + k).join(v);
          }
       }
-      console.log(tagName);
-      return eTagProvider.status(handler.eTag, tagName).then(function(status) {
+      return eTagProvider.status(tagName, tag).then(function(status) {
+
          if (status.modified === true) {
             if (status.current) {
                res.setHeader('ETag', status.current);
             }
             return requireAndCallDestination();
          } else {
+
             if (status.current) {
                res.setHeader('ETag', status.current);
             }
