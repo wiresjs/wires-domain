@@ -53,12 +53,17 @@ domain.service("WiresAssertHandler", function() {
 
 domain.path("/update", {
 	get: function($eTag) {
-		return $eTag.generate('pukka');
+		return $eTag.generate('sys-blog-query');
 	}
 });
 domain.path("/:lang?", {
-	eTag: 'pukka-$lang',
+	eTag: function(req) {
+		if (req._parsedUrl.query.indexOf("name") > -1) {
+			return 'sys-blog-query'
+		}
+	},
 	get: function($query, $assert) {
+		console.log("calling shit")
 		return {
 			pukka: "sukka"
 		}

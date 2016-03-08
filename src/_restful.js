@@ -474,9 +474,14 @@ var callCurrentResource = function(info, req, res) {
    };
 
    if (handler.eTag && method === 'get') {
-      var tagName = handler.eTag;
+      var tagName = _.isFunction(handler.eTag) ? handler.eTag(req, res) : handler.eTag;
+      if (!tagName) {
+         return requireAndCallDestination();
+      }
+
       var tag = req.headers['if-none-match'];
       var ps = _.merge(req.query, mergedParams);
+
       for (var k in ps) {
          var v = ps[k];
          if (v !== undefined) {
