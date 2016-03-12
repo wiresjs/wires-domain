@@ -29,6 +29,14 @@ domain.require always returns a promise.
 
 For more example see test/flow.js
 
+
+## Modules
+
+Modules are ultimately the same as services, with one difference. Modules are required once.
+All dependencies are resolved once, and closure is stored.
+This boosts the load speed.
+
+
 ### Asynchronous
 
 	domain.service("$wait", function() {

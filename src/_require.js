@@ -8,6 +8,7 @@ var isPromise = function(v) {
    return _.isFunction(v.then) && _.isFunction(v.catch);
 };
 
+global.__wires_services_cached__ = global.__wires_services_cached__ || {};
 //Extract parameter names from a function
 var getParamNames = function(func) {
    var STRIP_COMMENTS = /((\/\/.*$)|(\/\*[\s\S]*?\*\/))/mg;
@@ -88,6 +89,11 @@ var Require = {
    service: function() {
       this.register.apply(this, arguments);
    },
+   module: function(name, func, opts) {
+      opts = opts || {};
+      opts.cache = true;
+      this.register.apply(this, [name, func, opts]);
+   },
    register: function(name, arg1, arg2) {
       var localArgs = null;
       var target = arg1;
@@ -95,10 +101,16 @@ var Require = {
          localArgs = arg1;
          target = arg2;
       }
+      var cache = false;
+      if (_.isPlainObject(arg2)) {
+         cache = arg2.cache === true;
+      }
       global.__wires_services__ = global.__wires_services__ || {};
       global.__wires_services__[name] = {
+         name: name,
          target: target,
-         args: localArgs
+         args: localArgs,
+         cache: cache
       };
    },
    isServiceRegistered: function(name) {
@@ -121,6 +133,9 @@ var Require = {
    },
    promise: function(cb) {
       return new Promise(cb);
+   },
+   storeModule: function(name, inst) {
+      global.__wires_services_cached__[name] = inst;
    },
    require: function() {
       var data = getInputArguments(arguments);
@@ -154,6 +169,9 @@ var Require = {
 
          var results = [];
          return domainEach(args, function(item) {
+            if (item.cache && global.__wires_services_cached__[item.name]) {
+               return global.__wires_services_cached__[item.name];
+            }
             var argService = item.target;
             var requiredArgs = item.args;
 
@@ -165,7 +183,12 @@ var Require = {
                } else {
                   currentArgs = [argService, localServices];
                }
+
                return self.require.apply(self, currentArgs).then(function(dest) {
+
+                  if (item.cache) {
+                     self.storeModule(item.name, dest);
+                  }
                   if (dest && dest.__domain_factory__) {
                      var inst = new dest();
                      return self.require({

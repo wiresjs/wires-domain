@@ -10,6 +10,8 @@ module.exports = {
 	// Register new service
 	service: Require.service.bind(Require),
 
+	module: Require.module.bind(Require),
+
 	requirePackage: Require.requirePackage.bind(Require),
 	// Factory
 	Factory: Require.Factory,
