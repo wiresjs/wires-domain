@@ -375,6 +375,8 @@ var callCurrentResource = function(info, req, res) {
    // Define method name
    var method = req.method.toLowerCase();
 
+   var corsDomains = "*";
+
    // check for cors option request
    if (method === "options" && handler.cors === true) {
       res.header("Access-Control-Allow-Origin", "*");
@@ -417,24 +419,30 @@ var callCurrentResource = function(info, req, res) {
       });
    }
 
-   var requireAndCallDestination = function() {
-      Require.require(parseOptions, restLocalServices(info, mergedParams, req, res)).then(function(result) {
-         if (result !== undefined) {
-            if (req.__jsonp_callback__) {
-               var jsname;
-               if ((jsname = req.query[req.__jsonp_callback__])) {
+   var executeInteceptor = function() {
+      return new Promise(function(resolve, reject) {
+         if (!handler.intercept)
+            return resolve();
 
-                  if (jsname.match(/^[a-z]+/gmi)) {
-                     if (_.isPlainObject(result) || _.isArray(result)) {
-                        res.setHeader('content-type', 'application/javascript');
-                        var str = jsname + "(" + JSON.stringify(result) + ")";
-                        return res.send(str);
-                     }
-                  }
-               }
-            }
-            return res.send(result);
+         if (_.isString(handler.intercept)) {
+            return Require.require(handler.intercept, function(remoteInterceptor) {
+               return Require.require(remoteInterceptor,
+                  restLocalServices(info, mergedParams, req, res));
+            }).then(resolve).catch(reject);
          }
+         if (_.isFunction(handler.intercept)) {
+            return Require.require(handler.intercept, restLocalServices(info, mergedParams, req, res)).then(resolve).catch(reject);
+         }
+         return resolve();
+      });
+   }
+   var requireAndCallDestination = function() {
+      executeInteceptor().then(function() {
+         return Require.require(parseOptions, restLocalServices(info, mergedParams, req, res)).then(function(result) {
+            if (result !== undefined) {
+               return res.send(result);
+            }
+         })
       }).catch(function(e) {
          var err = {
             status: 500,
