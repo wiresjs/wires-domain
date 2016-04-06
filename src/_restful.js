@@ -437,8 +437,12 @@ var callCurrentResource = function(info, req, res) {
       });
    }
    var requireAndCallDestination = function() {
-      executeInteceptor().then(function() {
-         return Require.require(parseOptions, restLocalServices(info, mergedParams, req, res)).then(function(result) {
+      executeInteceptor().then(function(additionalServices) {
+         var _localServices = restLocalServices(info, mergedParams, req, res);
+         if (additionalServices && _.isPlainObject(additionalServices)) {
+            _localServices = _.merge(_localServices, additionalServices);
+         }
+         return Require.require(parseOptions, _localServices).then(function(result) {
             if (result !== undefined) {
                return res.send(result);
             }
