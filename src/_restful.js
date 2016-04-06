@@ -295,7 +295,7 @@ var restLocalServices = function(info, params, req, res) {
 
    services.$cors = function(domains) {
       res.header("Access-Control-Allow-Origin", domains || "*");
-      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Session");
    };
 
    // Query
@@ -380,13 +380,13 @@ var callCurrentResource = function(info, req, res) {
    // check for cors option request
    if (method === "options" && handler.cors === true) {
       res.header("Access-Control-Allow-Origin", "*");
-      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Session");
       return res.send({});
    }
    // setting cors headers for any other method
    if (handler.cors) {
       res.header("Access-Control-Allow-Origin", "*");
-      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+      res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept, Session");
    }
 
    // Allow to define free style method for access
