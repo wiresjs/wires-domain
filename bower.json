@@ -1,0 +1,27 @@
+{
+  "name": "wires-domain",
+  "description": "Restfull service with dependency injection",
+  "main": "index.js",
+  "authors": [
+    "ivan.orlov"
+  ],
+  "license": "MIT",
+  "keywords": [
+    "restful",
+    "domain",
+    "mongodb",
+    "mysql"
+  ],
+  "homepage": "https://github.com/wiresjs/wires-domain",
+  "moduleType": [],
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "lodash": "^4.11.1"
+  }
+}

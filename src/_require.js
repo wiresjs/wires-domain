@@ -80,12 +80,6 @@ var getInputArguments = function(args) {
 var Require = {
    // Factory constructor
    // Class is used for creating an instance with following resolution
-   Factory: Class.extend({
-      init: function() {},
-   }, {
-      __domain_factory__: true
-   }),
-
    service: function() {
       this.register.apply(this, arguments);
    },
@@ -183,21 +177,9 @@ var Require = {
                } else {
                   currentArgs = [argService, localServices];
                }
-
                return self.require.apply(self, currentArgs).then(function(dest) {
-
                   if (item.cache) {
                      self.storeModule(item.name, dest);
-                  }
-                  if (dest && dest.__domain_factory__) {
-                     var inst = new dest();
-                     return self.require({
-                        source: dest.prototype.init,
-                        target: inst.init,
-                        instance: inst
-                     }, avialableServices).then(function() {
-                        return inst;
-                     });
                   }
                   return dest;
                });

@@ -7,7 +7,6 @@ var app = express();
 
 app.use(cookieParser('your secret here'));
 
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
 	extended: true
@@ -17,7 +16,8 @@ require('require-all')(__dirname + '/testservices');
 require('require-all')(__dirname + '/testrest');
 app.use(domain.express());
 
-
+app.use('/dist', express.static(__dirname + '/dist'));
+app.use('/bower_components', express.static(__dirname + '/bower_components'));
 
 var server = app.listen(3000, function() {
 

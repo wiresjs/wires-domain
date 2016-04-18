@@ -56,7 +56,7 @@ domain.path("/update", {
 		return $eTag.generate('sys-blog-query');
 	}
 });
-domain.path("/:lang?", {
+domain.path("/test:lang?", {
 	eTag: function(req) {
 		if (req._parsedUrl.query.indexOf("name") > -1) {
 			return 'sys-blog-query'

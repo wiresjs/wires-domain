@@ -1,5 +1,5 @@
 var should = require('should');
-var domain = require('../index.js');
+var domain = require('../src/wires-domain.js').domain;
 var Class = require('wires-class');
 var Promise = require("promise");
 
@@ -152,7 +152,7 @@ describe('Work flow', function() {
 		}).then(function() {
 			done("Should not come here");
 		}).catch(function(err) {
-
+			console.log(err)
 			err.status.should.be.equal(500);
 			done();
 		});
@@ -182,22 +182,6 @@ describe('Work flow', function() {
 			$local: "hello"
 		}).then(function(res) {
 			res.should.be.equal("some");
-			done();
-		});
-	});
-
-	it('Should Call and Create Sync factory', function(done) {
-		domain.require(function($someFactory) {
-			$someFactory.someMethod().should.be.equal("test");
-		}).then(function() {
-			done();
-		});
-	});
-
-	it('Should Call and Create Async factory', function(done) {
-		domain.require(function($asyncFactory) {
-			$asyncFactory.myVar.should.be.equal(1);
-		}).then(function() {
 			done();
 		});
 	});
