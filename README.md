@@ -7,7 +7,7 @@ wires-domain
 ## Installation
 
 	npm install wires-domain --save
-
+	bower install ws-domain --save
 ## Services
 
 Define few services
@@ -34,7 +34,6 @@ For more example see test/flow.js
 
 Modules are ultimately the same as services, with one difference. Modules are required once.
 All dependencies are resolved once, and closure is stored.
-This boosts the load speed.
 
 
 ### Asynchronous
@@ -46,38 +45,9 @@ This boosts the load speed.
 	});
 
 
-## Factories
-
-Wires supports automatic factory creation.
-Simply do that:
-
-    domain.service("item", function() {
-		return domain.Factory.extend({
-		    init : function($a)
-		    {
-		    	this.localVariable = $a;
-		    },
-		    testMe : function()
-		    {
-		    	return this.localVariable;
-		    }
-		});
-	});
-
-Accesing this service will constuct the model call init and resolve all injected dependencies
-
-	index: function($res, item) {
-		$res.send(item.testMe())
-	}
-
-You can create an abstraction layer on top on domain.Factory
-Extend as much as you like, building your own solutions!
-
-
 ## Restful Architecture
 
 2 folders to be created. Services and RestApi. Put all your dependencies into "services" folder.
-Resembles angular.js style.
 
 Require all at once:
 
