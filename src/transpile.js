@@ -5,7 +5,7 @@ module.exports = {
       var self = this;
       return es.map(function(file, cb) {
          var fileContent = file.contents.toString()
-         var content = self.srt(fileContent);
+         var content = self.str(fileContent);
          file.contents = new Buffer(content);
          cb(null, file);
       });
