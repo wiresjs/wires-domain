@@ -2,7 +2,7 @@ var _ = require('lodash');
 
 module.exports = {
    importify: function() {
-      var self - this;
+      var self = this;
       return es.map(function(file, cb) {
          var fileContent = file.contents.toString()
          var content = self.srt(fileContent);
