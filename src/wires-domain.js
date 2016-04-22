@@ -2,12 +2,22 @@
    var domain = {};
    var global;
 
-   var logger, _, Promise;
+   var _, Promise;
+   var logger = {};
    if (isNode) {
       global = $storage;
       Promise = require("promise");
       _ = require('lodash');
-      logger = require('log4js').getLogger("domain");
+      var log4js = require('log4js').getLogger("domain");
+      logger.fatal = function(msg) {
+         log4js.fatal(msg)
+      };
+      logger.log = function(msg) {
+         log4js.log(msg)
+      }
+      logger.warn = function() {
+         log4js.warn(msg)
+      };
    } else {
       if (!Exports._) {
          console.warn("Lodash is required for wires-domain!");
@@ -17,9 +27,15 @@
       global = {};
       Promise = Exports.Promise;
       logger = {
-         fatal: console.error,
-         log: console.log,
-         warn: console.warn
+         fatal: function(msg) {
+            console.error(msg);
+         },
+         log: function(msg) {
+            console.log(msg)
+         },
+         warn: function(msg) {
+            console.warn(msg);
+         }
       }
    }
 
@@ -207,6 +223,7 @@
                var v = variables[i];
                var variableName = variables[i];
                if (!avialableServices[variableName]) {
+                  console.log(logger)
                   logger.fatal("Error while injecting variable '" + variableName + "' into function \n" +
                      data.source.toString());
                   return reject({

@@ -19,7 +19,7 @@ app.use(domain.express());
 app.use('/dist', express.static(__dirname + '/dist'));
 app.use('/bower_components', express.static(__dirname + '/bower_components'));
 
-var server = app.listen(3000, function() {
+var server = app.listen(3015, function() {
 
 	var host = server.address().address;
 	var port = server.address().port;
