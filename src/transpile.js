@@ -1,5 +1,5 @@
 var _ = require('lodash');
-
+var es = require('event-stream');
 module.exports = {
    importify: function() {
       var self = this;
